@@ -53,7 +53,7 @@ export function gradeMeets(entry: SubjectEntry | undefined, minGrade: NSSCOGrade
   if (!entry || !entry.grade || entry.grade === "U") return false;
   if (entry.level === "NSSCA") {
     // Advanced subsidiary A–E all exceed any NSSCO requirement
-    return entry.grade !== "U";
+    return true;
   }
   const order: NSSCOGrade[] = ["A*", "A", "B", "C", "D", "E", "F", "G", "U"];
   return order.indexOf(entry.grade as NSSCOGrade) <= order.indexOf(minGrade);
