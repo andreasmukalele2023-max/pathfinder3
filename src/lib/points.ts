@@ -1,6 +1,6 @@
 export type Level = "NSSCO" | "NSSCA";
 export type NSSCOGrade = "A*" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "U";
-export type NSSCAGrade = "d" | "m" | "p" | "e" | "U";
+export type NSSCAGrade = "A" | "B" | "C" | "D" | "E" | "U";
 export type Grade = NSSCOGrade | NSSCAGrade;
 
 export interface SubjectEntry {
@@ -32,45 +32,28 @@ export const SUBJECTS = [
 ];
 
 export const NSSCO_GRADES: NSSCOGrade[] = ["A*", "A", "B", "C", "D", "E", "F", "G", "U"];
-export const NSSCA_GRADES: NSSCAGrade[] = ["d", "m", "p", "e", "U"];
+export const NSSCA_GRADES: NSSCAGrade[] = ["A", "B", "C", "D", "E", "U"];
 
-// Standard NSSCO points (used by NUST/IUM/Welwitchia scales are similar)
 const NSSCO_POINTS: Record<NSSCOGrade, number> = {
   "A*": 8, A: 7, B: 6, C: 5, D: 4, E: 3, F: 2, G: 1, U: 0,
 };
 
-// NSSCA (Advanced Subsidiary) — higher weighting
+// NSSCA Advanced Subsidiary: A=10, B=9, C=8, D=7, E=6, U=0
 const NSSCA_POINTS: Record<NSSCAGrade, number> = {
-  d: 8, m: 7, p: 6, e: 4, U: 0,
+  A: 10, B: 9, C: 8, D: 7, E: 6, U: 0,
 };
 
-// UNAM uses its own scale where A*=8 down to G=1 for NSSCO and Advanced adds bonus
-const UNAM_NSSCO: Record<NSSCOGrade, number> = {
-  "A*": 8, A: 7, B: 6, C: 5, D: 4, E: 3, F: 2, G: 1, U: 0,
-};
-const UNAM_NSSCA: Record<NSSCAGrade, number> = {
-  d: 8, m: 7, p: 6, e: 4, U: 0,
-};
-
-export function pointsFor(entry: SubjectEntry, institution: "UNAM" | "NUST" | "IUM" | "Welwitchia"): number {
+export function pointsFor(entry: SubjectEntry): number {
   if (!entry.grade || entry.grade === "U") return 0;
-  if (entry.level === "NSSCO") {
-    const g = entry.grade as NSSCOGrade;
-    if (institution === "UNAM") return UNAM_NSSCO[g] ?? 0;
-    return NSSCO_POINTS[g] ?? 0;
-  } else {
-    const g = entry.grade as NSSCAGrade;
-    if (institution === "UNAM") return UNAM_NSSCA[g] ?? 0;
-    return NSSCA_POINTS[g] ?? 0;
-  }
+  if (entry.level === "NSSCO") return NSSCO_POINTS[entry.grade as NSSCOGrade] ?? 0;
+  return NSSCA_POINTS[entry.grade as NSSCAGrade] ?? 0;
 }
 
 export function gradeMeets(entry: SubjectEntry | undefined, minGrade: NSSCOGrade): boolean {
   if (!entry || !entry.grade || entry.grade === "U") return false;
   if (entry.level === "NSSCA") {
-    // Advanced subsidiary always exceeds NSSCO requirement of C or better
-    const g = entry.grade as NSSCAGrade;
-    return g === "d" || g === "m" || g === "p" || g === "e";
+    // Advanced subsidiary A–E all exceed any NSSCO requirement
+    return true;
   }
   const order: NSSCOGrade[] = ["A*", "A", "B", "C", "D", "E", "F", "G", "U"];
   return order.indexOf(entry.grade as NSSCOGrade) <= order.indexOf(minGrade);
@@ -82,10 +65,10 @@ export function findSubject(entries: SubjectEntry[], name: string): SubjectEntry
 
 export function calcTotal(
   entries: SubjectEntry[],
-  institution: "UNAM" | "NUST" | "IUM" | "Welwitchia",
+  _institution: "UNAM" | "NUST" | "IUM" | "Welwitchia",
   bestN: 5 | 6 = 6,
 ): number {
   const valid = entries.filter((e) => e.subject && e.grade && e.grade !== "U");
-  const scored = valid.map((e) => pointsFor(e, institution)).sort((a, b) => b - a);
+  const scored = valid.map((e) => pointsFor(e)).sort((a, b) => b - a);
   return scored.slice(0, bestN).reduce((a, b) => a + b, 0);
 }
