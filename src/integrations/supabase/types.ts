@@ -14,7 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      scraped_courses: {
+        Row: {
+          best_n: number | null
+          duration: string | null
+          faculty: string | null
+          id: string
+          institution_key: string
+          min_points: number | null
+          name: string
+          requirements: Json | null
+          scraped_at: string
+          source_url: string | null
+        }
+        Insert: {
+          best_n?: number | null
+          duration?: string | null
+          faculty?: string | null
+          id?: string
+          institution_key: string
+          min_points?: number | null
+          name: string
+          requirements?: Json | null
+          scraped_at?: string
+          source_url?: string | null
+        }
+        Update: {
+          best_n?: number | null
+          duration?: string | null
+          faculty?: string | null
+          id?: string
+          institution_key?: string
+          min_points?: number | null
+          name?: string
+          requirements?: Json | null
+          scraped_at?: string
+          source_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
