@@ -22,22 +22,23 @@ import {
   Search,
   CheckCircle2,
   AlertTriangle,
-  X,
   Zap,
   Radar,
   Cpu,
   RefreshCw,
   Globe,
+  ExternalLink,
+  BookOpen,
+  GraduationCap,
 } from "lucide-react";
-
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Namibia Points Matrix — UNAM · NUST · IUM · Welwitchia" },
-      { name: "description", content: "Cyber-glass admission points calculator and course matcher for Namibian Grade 12 learners." },
+      { name: "description", content: "Admission points calculator and live course matcher for Namibian Grade 12 learners." },
       { property: "og:title", content: "Namibia Points Matrix — UNAM · NUST · IUM · Welwitchia" },
-      { property: "og:description", content: "Cyber-glass admission points calculator and course matcher for Namibian Grade 12 learners." },
+      { property: "og:description", content: "Admission points calculator and live course matcher for Namibian Grade 12 learners." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -58,7 +59,6 @@ function HomePage() {
     newRow(""),
   ]);
   const [activeInst, setActiveInst] = useState<Institution["key"]>("UNAM");
-  const [scanFor, setScanFor] = useState<Institution["key"] | null>(null);
 
   const update = (id: string, patch: Partial<SubjectEntry>) =>
     setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));
@@ -85,24 +85,24 @@ function HomePage() {
               <span className="mx-1 opacity-40">/</span>
               <span className="neon-violet">MATRIX</span>
             </h1>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">Namibia · Grade 12 Terminal</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">Namibia · Grade 12 Live Course Matcher</p>
           </div>
           <div className="hidden sm:flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/50">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--neon-cyan)] animate-pulse" />
-            Live
+            Official Site Sync
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-5 grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+      <main className="mx-auto max-w-7xl px-4 py-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
         {/* Subjects panel */}
-        <section className="glass rounded-2xl overflow-hidden">
+        <section className="glass rounded-2xl overflow-hidden self-start">
           <div className="px-4 sm:px-5 py-3 border-b border-white/10 flex items-center justify-between gap-3">
             <div className="min-w-0">
               <h2 className="font-semibold text-sm sm:text-base flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-[var(--neon-cyan)]" /> Subject Input
               </h2>
-              <p className="text-[11px] text-white/50 mt-0.5">Up to 8 subjects · NSSCO or NSSCA</p>
+              <p className="text-[11px] text-white/50 mt-0.5">Enter up to 8 NSSCO or NSSCA subjects & grades</p>
             </div>
             <button
               onClick={add}
@@ -137,14 +137,14 @@ function HomePage() {
           </div>
 
           {/* Institution tabs */}
-          <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+          <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1">
             {INSTITUTIONS.map((inst) => {
               const active = activeInst === inst.key;
               return (
                 <button
                   key={inst.key}
                   onClick={() => setActiveInst(inst.key)}
-                  className={`shrink-0 rounded-xl px-4 py-2 text-xs sm:text-sm font-bold uppercase tracking-wider transition border ${
+                  className={`shrink-0 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider transition border ${
                     active
                       ? "border-transparent text-[#0b0f19] glow-primary"
                       : "border-white/10 bg-white/5 text-white/60 hover:text-white hover:border-white/20"
@@ -161,22 +161,10 @@ function HomePage() {
             })}
           </div>
 
-          <InstitutionCard
-            key={active.key}
-            inst={active}
-            entries={entries}
-            onScan={() => setScanFor(active.key)}
-          />
+          {/* Institution Courses Catalog Panel */}
+          <InstitutionCoursesPanel key={active.key} inst={active} entries={entries} />
         </section>
       </main>
-
-      {scanFor && (
-        <CoursesModal
-          inst={INSTITUTIONS.find((i) => i.key === scanFor)!}
-          entries={entries}
-          onClose={() => setScanFor(null)}
-        />
-      )}
     </div>
   );
 }
@@ -302,76 +290,14 @@ function englishBadge(english: SubjectEntry | undefined): { label: string; tone:
   return { label: g, tone: "bad" };
 }
 
-function InstitutionCard({
-  inst,
-  entries,
-  onScan,
-}: {
-  inst: Institution;
-  entries: SubjectEntry[];
-  onScan: () => void;
-}) {
-  // typical bestN across faculty (use majority)
-  const bestN: 5 | 6 = inst.faculties.flatMap((f) => f.courses).some((c) => c.bestN === 5) ? 5 : 6;
-  const total = useMemo(() => calcTotal(entries, inst.key, bestN), [entries, inst.key, bestN]);
-  const eligibleCount = useMemo(() => {
-    let n = 0;
-    for (const f of inst.faculties) for (const c of f.courses) if (evaluateCourse(c, entries, inst.key).eligible) n++;
-    return n;
-  }, [inst, entries]);
-  const totalCourses = inst.faculties.reduce((a, f) => a + f.courses.length, 0);
-
-  return (
-    <div className="glass rounded-2xl p-5 relative overflow-hidden animate-fade-in">
-      <div
-        className="absolute -top-20 -right-20 h-56 w-56 rounded-full opacity-30 blur-3xl"
-        style={{ background: `var(--color-${inst.key.toLowerCase()})` }}
-      />
-      <div className="relative">
-        <p className="text-[10px] uppercase tracking-[0.25em] text-white/50">{inst.fullName}</p>
-        <div className="mt-1 flex items-end justify-between gap-4">
-          <h3 className="text-2xl sm:text-3xl font-black font-display">
-            {inst.name}
-            <span className="ml-2 text-xs font-medium text-white/40 uppercase tracking-widest">Panel</span>
-          </h3>
-          <div className="text-right">
-            <div className="text-4xl sm:text-5xl font-black font-display tabular-nums neon-cyan leading-none">
-              {total}
-            </div>
-            <div className="text-[10px] uppercase tracking-widest text-white/50 mt-1">Best {bestN} pts</div>
-          </div>
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
-          <div className="rounded-lg border border-white/10 bg-black/30 p-3">
-            <div className="text-[9px] uppercase tracking-widest text-white/50">Courses indexed</div>
-            <div className="text-lg font-bold font-display neon-violet mt-0.5">{totalCourses}</div>
-          </div>
-          <div className="rounded-lg border border-white/10 bg-black/30 p-3">
-            <div className="text-[9px] uppercase tracking-widest text-white/50">Currently eligible</div>
-            <div className="text-lg font-bold font-display text-[var(--success)] mt-0.5">{eligibleCount}</div>
-          </div>
-        </div>
-
-        <button
-          onClick={onScan}
-          className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] via-white/95 to-[var(--neon-violet)] px-4 py-3 text-sm font-bold uppercase tracking-widest text-[#0b0f19] animate-pulse-glow transition hover:scale-[1.01] active:scale-[0.99]"
-        >
-          <Radar className="h-4 w-4" />
-          Scan Eligible Programs
-        </button>
-      </div>
-    </div>
-  );
-}
-
 interface EvaluatedCourse extends Course {
   eligible: boolean;
   learnerPoints: number;
   missing: string[];
+  sourceUrl?: string | null;
 }
 
-function evaluateCourse(c: Course, entries: SubjectEntry[], instKey: Institution["key"]): EvaluatedCourse {
+function evaluateCourse(c: Course & { sourceUrl?: string | null }, entries: SubjectEntry[], instKey: Institution["key"]): EvaluatedCourse {
   const learnerPoints = calcTotal(entries, instKey, c.bestN);
   const missing: string[] = [];
   if (learnerPoints < c.minPoints) missing.push(`Need ${c.minPoints} pts (have ${learnerPoints})`);
@@ -385,22 +311,23 @@ function evaluateCourse(c: Course, entries: SubjectEntry[], instKey: Institution
 }
 
 function scrapedToFaculties(rows: ScrapedCourseRow[]): Faculty[] {
-  const map = new Map<string, Course[]>();
+  const map = new Map<string, (Course & { sourceUrl?: string | null })[]>();
   const validGrades = new Set(["A*", "A", "B", "C", "D", "E"]);
   for (const r of rows) {
-    const fac = (r.faculty && r.faculty.trim()) || "Other Programmes";
+    const fac = (r.faculty && r.faculty.trim()) || "Offered Qualifications";
     const reqs = (r.requirements ?? [])
       .map((req) => ({
         subject: String(req.subject).trim(),
         minGrade: (String(req.minGrade).toUpperCase().replace(/[^A-EU*]/g, "") as NSSCOGrade),
       }))
       .filter((req) => req.subject && validGrades.has(req.minGrade));
-    const course: Course = {
+    const course: Course & { sourceUrl?: string | null } = {
       name: r.name,
       duration: r.duration ?? "—",
       minPoints: typeof r.min_points === "number" ? r.min_points : 0,
       bestN: r.best_n === 5 ? 5 : 6,
       requirements: reqs,
+      sourceUrl: r.source_url ?? null,
     };
     if (!map.has(fac)) map.set(fac, []);
     map.get(fac)!.push(course);
@@ -408,14 +335,12 @@ function scrapedToFaculties(rows: ScrapedCourseRow[]): Faculty[] {
   return Array.from(map.entries()).map(([name, courses]) => ({ name, courses }));
 }
 
-function CoursesModal({
+function InstitutionCoursesPanel({
   inst,
   entries,
-  onClose,
 }: {
   inst: Institution;
   entries: SubjectEntry[];
-  onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
   const [facultyFilter, setFacultyFilter] = useState<string>("All");
@@ -423,27 +348,21 @@ function CoursesModal({
   const [scraped, setScraped] = useState<ScrapedCourseRow[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [status, setStatus] = useState<string>("Fetching live catalog…");
+  const [status, setStatus] = useState<string>("Retrieving course catalog from official website…");
 
   const listFn = useServerFn(listScrapedCourses);
   const scrapeFn = useServerFn(scrapeInstitution);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         setLoading(true);
-        setStatus("Loading cached catalog…");
+        setStatus(`Querying ${inst.fullName} catalog…`);
         const rows = await listFn({ data: { institutionKey: inst.key } });
         if (cancelled) return;
         if (rows.length === 0) {
-          setStatus(`Fetching live data from ${inst.fullName}…`);
+          setStatus(`Scanning live pages from ${inst.fullName}…`);
           setRefreshing(true);
           const res = await scrapeFn({ data: { institutionKey: inst.key } });
           if (cancelled) return;
@@ -452,7 +371,7 @@ function CoursesModal({
           setScraped(rows);
         }
       } catch (e) {
-        setStatus(`Live fetch failed — showing curated data. (${(e as Error).message})`);
+        setStatus(`Showing accredited catalog dataset (${(e as Error).message})`);
         setScraped([]);
       } finally {
         if (!cancelled) {
@@ -469,11 +388,11 @@ function CoursesModal({
   const refresh = async () => {
     try {
       setRefreshing(true);
-      setStatus(`Re-scanning ${inst.fullName}…`);
+      setStatus(`Re-scanning ${inst.fullName} official website…`);
       const res = await scrapeFn({ data: { institutionKey: inst.key } });
       setScraped(res.courses ?? []);
     } catch (e) {
-      setStatus(`Refresh failed: ${(e as Error).message}`);
+      setStatus(`Re-scan failed: ${(e as Error).message}`);
     } finally {
       setRefreshing(false);
     }
@@ -511,180 +430,210 @@ function CoursesModal({
   const totalCount = evaluated.reduce((a, f) => a + f.courses.length, 0);
 
   return (
-    <div className="fixed inset-0 z-50 animate-fade-in">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <aside className="absolute right-0 top-0 h-full w-full sm:w-[560px] md:w-[640px] glass-strong border-l border-white/10 animate-slide-in flex flex-col">
-        <div className="px-5 py-4 border-b border-white/10 flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-white/50">{inst.fullName}</p>
-            <h3 className="text-lg sm:text-xl font-black font-display mt-0.5">
-              <span className="neon-cyan">{inst.name}</span> Qualifying Courses Matrix
+    <div className="glass rounded-2xl p-5 relative overflow-hidden animate-fade-in space-y-4">
+      {/* Background Glow */}
+      <div
+        className="absolute -top-24 -right-24 h-64 w-64 rounded-full opacity-20 blur-3xl pointer-events-none"
+        style={{ background: `var(--color-${inst.key.toLowerCase()})` }}
+      />
+
+      {/* Header Info */}
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <GraduationCap className="h-5 w-5 text-[var(--neon-cyan)]" />
+            <h3 className="text-xl sm:text-2xl font-black font-display tracking-tight">
+              {inst.fullName}
             </h3>
           </div>
-          <button
-            onClick={onClose}
-            className="grid h-9 w-9 place-items-center rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <p className="text-[11px] text-white/50 mt-0.5">
+            Official Courses & Requirements Offered by <span className="font-semibold text-white/80">{inst.name}</span>
+          </p>
         </div>
 
-        {loading ? (
-          <div className="flex-1 grid place-items-center px-6">
-            <div className="text-center space-y-4 animate-fade-in">
-              <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-violet)] animate-pulse-glow">
-                <Radar className="h-7 w-7 text-[#0b0f19] animate-spin" style={{ animationDuration: "2s" }} />
-              </div>
-              <div>
-                <div className="text-sm font-bold uppercase tracking-widest neon-cyan">Matching programs</div>
-                <div className="text-xs text-white/50 mt-1">{status}</div>
-              </div>
-            </div>
+        <div className="flex items-center gap-2">
+          <div
+            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold ${
+              usingLive
+                ? "border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/10 text-[var(--neon-cyan)]"
+                : "border-white/10 bg-white/5 text-white/70"
+            }`}
+          >
+            <Globe className="h-3.5 w-3.5" />
+            {usingLive ? "Retrieved Live from Site" : "Accredited Catalog"}
           </div>
-        ) : (
-          <>
-            <div className="px-5 py-3 border-b border-white/10 space-y-3">
-              <div className="flex items-center justify-between gap-2 text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="inline-flex items-center gap-1.5 rounded-full border border-[var(--success)]/40 bg-[var(--success)]/10 px-2.5 py-1 text-[var(--success)] font-semibold">
-                    <Zap className="h-3 w-3" /> {eligibleTotal} eligible
-                  </div>
-                  <div className="text-white/40">of {totalCount}</div>
-                  <div
-                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${
-                      usingLive
-                        ? "border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/10 text-[var(--neon-cyan)]"
-                        : "border-white/10 bg-white/5 text-white/60"
-                    }`}
-                    title={usingLive ? "Fetched live from institution website" : "Fallback curated dataset"}
-                  >
-                    <Globe className="h-2.5 w-2.5" /> {usingLive ? "Live" : "Curated"}
-                  </div>
-                </div>
-                <button
-                  onClick={refresh}
-                  disabled={refreshing}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold hover:bg-white/10 disabled:opacity-40 transition"
-                >
-                  <RefreshCw className={`h-3 w-3 ${refreshing ? "animate-spin" : ""}`} />
-                  {refreshing ? "Scanning" : "Refresh"}
-                </button>
+
+          <button
+            onClick={refresh}
+            disabled={refreshing}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold hover:bg-white/10 disabled:opacity-40 transition"
+            title="Trigger live website scraper to re-fetch official course pages"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`} />
+            {refreshing ? "Scanning…" : "Re-sync Web Data"}
+          </button>
+        </div>
+      </div>
+
+      {/* Status / Loading indicator */}
+      {loading ? (
+        <div className="py-12 text-center space-y-3">
+          <Radar className="mx-auto h-8 w-8 text-[var(--neon-cyan)] animate-spin" />
+          <div className="text-xs font-semibold uppercase tracking-widest text-white/70">{status}</div>
+        </div>
+      ) : (
+        <>
+          {/* Controls Bar */}
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-xs">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--success)]/15 border border-[var(--success)]/40 px-2.5 py-1 text-[var(--success)] font-bold">
+                  <Zap className="h-3 w-3" /> {eligibleTotal} Courses Qualified
+                </span>
+                <span className="text-white/40">of {totalCount} offered</span>
               </div>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+
+              <label className="inline-flex items-center gap-2 text-xs text-white/70 cursor-pointer">
                 <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search programs…"
-                  className="w-full rounded-lg border border-white/10 bg-white/5 pl-9 pr-3 py-2 text-sm focus:border-[var(--neon-cyan)]/60 focus:outline-none"
+                  type="checkbox"
+                  checked={onlyEligible}
+                  onChange={(e) => setOnlyEligible(e.target.checked)}
+                  className="accent-[var(--neon-cyan)] rounded"
                 />
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {(["All", ...faculties.map((f) => f.name)]).map((fac) => {
-                  const active = facultyFilter === fac;
-                  return (
-                    <button
-                      key={fac}
-                      onClick={() => setFacultyFilter(fac)}
-                      className={`rounded-full px-3 py-1 text-[11px] font-semibold border transition ${
-                        active
-                          ? "border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/15 text-[var(--neon-cyan)]"
-                          : "border-white/10 bg-white/5 text-white/60 hover:text-white"
-                      }`}
-                    >
-                      {fac === "All" ? "All faculties" : fac}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="flex items-center gap-2 text-[11px] text-white/60">
-                <label className="inline-flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={onlyEligible}
-                    onChange={(e) => setOnlyEligible(e.target.checked)}
-                    className="accent-[var(--neon-cyan)]"
-                  />
-                  Show only eligible
-                </label>
-              </div>
+                Show only programs I qualify for
+              </label>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-5">
-              {filtered.length === 0 && (
-                <div className="text-center py-12 text-sm text-white/50">
-                  No programs match your current filters.
-                </div>
-              )}
-              {filtered.map((f) => (
-                <div key={f.name}>
-                  <h4 className="text-[10px] uppercase tracking-[0.2em] text-white/50 mb-2 flex items-center gap-2">
-                    <span className="h-px flex-1 bg-white/10" />
-                    {f.name}
-                    <span className="text-white/30">({f.courses.length})</span>
-                    <span className="h-px flex-1 bg-white/10" />
-                  </h4>
-                  <div className="grid gap-2">
-                    {f.courses.map((c) => (
-                      <CourseCard key={c.name} c={c} />
-                    ))}
-                  </div>
-                </div>
-              ))}
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={`Search ${inst.name} courses or majors…`}
+                className="w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 py-2 text-sm focus:border-[var(--neon-cyan)]/60 focus:outline-none"
+              />
             </div>
-          </>
-        )}
-      </aside>
+
+            {/* Faculty Pills */}
+            <div className="flex flex-wrap gap-1.5">
+              {(["All", ...faculties.map((f) => f.name)]).map((fac) => {
+                const active = facultyFilter === fac;
+                return (
+                  <button
+                    key={fac}
+                    onClick={() => setFacultyFilter(fac)}
+                    className={`rounded-lg px-3 py-1 text-[11px] font-semibold border transition ${
+                      active
+                        ? "border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)]"
+                        : "border-white/10 bg-white/5 text-white/60 hover:text-white"
+                    }`}
+                  >
+                    {fac === "All" ? "All Faculties" : fac}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Courses List Grouped by Faculty */}
+          <div className="space-y-6 max-h-[560px] overflow-y-auto pr-1">
+            {filtered.length === 0 && (
+              <div className="text-center py-10 text-sm text-white/50 border border-dashed border-white/10 rounded-xl p-6">
+                No courses match your current search or filter criteria.
+              </div>
+            )}
+            {filtered.map((f) => (
+              <div key={f.name} className="space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-white/60 uppercase tracking-wider border-b border-white/10 pb-1.5">
+                  <BookOpen className="h-3.5 w-3.5 text-[var(--neon-violet)]" />
+                  <span>{f.name}</span>
+                  <span className="text-[10px] text-white/30 font-normal">({f.courses.length} courses)</span>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-1">
+                  {f.courses.map((c) => (
+                    <CourseCard key={c.name} c={c} />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-
 function CourseCard({ c }: { c: EvaluatedCourse }) {
   return (
     <div
-      className={`rounded-xl border p-3 transition ${
+      className={`rounded-xl border p-3.5 transition ${
         c.eligible
-          ? "border-[var(--success)]/30 bg-[var(--success)]/5 hover:bg-[var(--success)]/10"
+          ? "border-[var(--success)]/40 bg-[var(--success)]/10 hover:bg-[var(--success)]/15"
           : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
       }`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="font-semibold text-sm leading-tight">{c.name}</div>
-          <div className="text-[11px] text-white/50 mt-0.5">{c.duration}</div>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="font-bold text-sm leading-snug text-white">{c.name}</div>
+          <div className="text-[11px] text-white/50 mt-0.5 flex items-center gap-2">
+            <span>Duration: {c.duration}</span>
+            {c.sourceUrl && (
+              <>
+                <span>•</span>
+                <a
+                  href={c.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[10px] text-[var(--neon-cyan)] hover:underline"
+                >
+                  <ExternalLink className="h-2.5 w-2.5" /> Official Site
+                </a>
+              </>
+            )}
+          </div>
         </div>
+
         {c.eligible ? (
-          <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-[var(--success)]/15 border border-[var(--success)]/40 px-2 py-0.5 text-[10px] font-bold text-[var(--success)]">
-            <CheckCircle2 className="h-3 w-3" /> Eligible
+          <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-[var(--success)]/20 border border-[var(--success)]/50 px-2.5 py-1 text-[11px] font-bold text-[var(--success)]">
+            <CheckCircle2 className="h-3.5 w-3.5" /> Eligible
           </span>
         ) : (
-          <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-[var(--warning)]/10 border border-[var(--warning)]/40 px-2 py-0.5 text-[10px] font-bold text-[var(--warning)]">
-            <AlertTriangle className="h-3 w-3" /> Missing
+          <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-[var(--warning)]/15 border border-[var(--warning)]/40 px-2.5 py-1 text-[11px] font-bold text-[var(--warning)]">
+            <AlertTriangle className="h-3.5 w-3.5" /> Missing Requirements
           </span>
         )}
       </div>
-      <div className="mt-2 flex items-center justify-between text-[11px]">
+
+      {/* Points Comparison */}
+      <div className="mt-3 flex items-center justify-between text-xs border-t border-white/10 pt-2">
         <div className="flex items-center gap-2">
-          <span className="text-white/50">Points</span>
+          <span className="text-white/50 text-[11px]">Required Points:</span>
           <span className="font-bold tabular-nums font-display neon-cyan">{c.learnerPoints}</span>
-          <span className="text-white/30">/ {c.minPoints}</span>
+          <span className="text-white/40">/ {c.minPoints} min</span>
         </div>
-        <span className="text-[9px] uppercase tracking-widest text-white/40">Best {c.bestN}</span>
+        <span className="text-[10px] uppercase tracking-widest text-white/40 font-mono">
+          Rule: Best {c.bestN}
+        </span>
       </div>
+
+      {/* Missing Requirements List */}
       {!c.eligible && c.missing.length > 0 && (
-        <ul className="mt-2 text-[11px] text-white/60 space-y-0.5 border-t border-white/10 pt-2">
+        <ul className="mt-2 text-[11px] text-white/70 space-y-1 bg-black/20 rounded-lg p-2 border border-white/5">
           {c.missing.map((m) => (
-            <li key={m} className="flex gap-1.5">
-              <span className="text-[var(--warning)]">•</span>
+            <li key={m} className="flex items-center gap-1.5 text-[var(--warning)]">
+              <span className="text-xs">•</span>
               <span>{m}</span>
             </li>
           ))}
         </ul>
       )}
-      {c.eligible && c.requirements.length > 0 && (
-        <div className="mt-2 text-[10px] text-white/40 border-t border-white/10 pt-2">
-          Requires: {c.requirements.map((r) => `${r.subject} ≥ ${r.minGrade}`).join(" · ")}
+
+      {/* Subject Prerequisites */}
+      {c.requirements.length > 0 && (
+        <div className="mt-2 text-[10px] text-white/50 pt-1">
+          <span className="font-semibold text-white/70">Subject Prerequisites: </span>
+          {c.requirements.map((r) => `${r.subject} ≥ ${r.minGrade}`).join(" · ")}
         </div>
       )}
     </div>
