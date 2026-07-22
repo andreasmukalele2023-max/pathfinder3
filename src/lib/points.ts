@@ -65,7 +65,7 @@ export function findSubject(entries: SubjectEntry[], name: string): SubjectEntry
 
 export function calcTotal(
   entries: SubjectEntry[],
-  _institution: "UNAM" | "NUST" | "IUM" | "Welwitchia",
+  _institution: "UNAM" | "NUST" | "IUM" | "Welwitchia" | "TC" | "IOL" | "SBS" | "NIPAM",
   bestN: 5 | 6 = 6,
 ): number {
   const valid = entries.filter((e) => e.subject && e.grade && e.grade !== "U");
