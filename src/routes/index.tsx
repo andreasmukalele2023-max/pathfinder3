@@ -30,8 +30,8 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "Namibia Points Matrix — UNAM · NUST · IUM · Welwitchia" },
       { name: "description", content: "Cyber-glass admission points calculator and course matcher for Namibian Grade 12 learners." },
-      { property: "og:title", content: "Namibia Points Matrix" },
-      { property: "og:description", content: "Calculate NSSCO / NSSCA points and scan qualifying courses across UNAM, NUST, IUM and Welwitchia." },
+      { property: "og:title", content: "Namibia Points Matrix — UNAM · NUST · IUM · Welwitchia" },
+      { property: "og:description", content: "Cyber-glass admission points calculator and course matcher for Namibian Grade 12 learners." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
