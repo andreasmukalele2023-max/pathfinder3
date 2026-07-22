@@ -30,15 +30,20 @@ import {
   ExternalLink,
   BookOpen,
   GraduationCap,
+  X,
+  Filter,
+  Info,
+  Award,
+  Clock,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Namibia Points Matrix — UNAM · NUST · IUM · Welwitchia" },
-      { name: "description", content: "Admission points calculator and live course matcher for Namibian Grade 12 learners." },
-      { property: "og:title", content: "Namibia Points Matrix — UNAM · NUST · IUM · Welwitchia" },
-      { property: "og:description", content: "Admission points calculator and live course matcher for Namibian Grade 12 learners." },
+      { title: "Namibia Points Matrix — UNAM · NUST · IUM · Welwitchia · TC · IOL · SBS · NIPAM" },
+      { name: "description", content: "All official courses offered by Namibian tertiary institutions with requirements, points calculator and live site sync." },
+      { property: "og:title", content: "Namibia Points Matrix — Complete Namibian University Course Finder" },
+      { property: "og:description", content: "Explore all courses offered by UNAM, NUST, IUM, Welwitchia, Triumphant College, IOL, SBS, and NIPAM." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -85,17 +90,17 @@ function HomePage() {
               <span className="mx-1 opacity-40">/</span>
               <span className="neon-violet">MATRIX</span>
             </h1>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">Namibia · Grade 12 Live Course Matcher</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">Complete Namibian Tertiary Course Catalog</p>
           </div>
           <div className="hidden sm:flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/50">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--neon-cyan)] animate-pulse" />
-            Official Site Sync
+            Official University Data Sync
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
-        {/* Subjects panel */}
+      <main className="mx-auto max-w-7xl px-4 py-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
+        {/* Left Panel: Subject Inputs */}
         <section className="glass rounded-2xl overflow-hidden self-start">
           <div className="px-4 sm:px-5 py-3 border-b border-white/10 flex items-center justify-between gap-3">
             <div className="min-w-0">
@@ -126,7 +131,7 @@ function HomePage() {
           </div>
         </section>
 
-        {/* Metrics + Institution panel */}
+        {/* Right Panel: Metrics + Institution Selector + All Offered Courses */}
         <section className="space-y-4 min-w-0">
           <div className="glass rounded-2xl p-4 sm:p-5">
             <div className="grid grid-cols-3 gap-3">
@@ -136,7 +141,7 @@ function HomePage() {
             </div>
           </div>
 
-          {/* Institution tabs */}
+          {/* Institution Selector Tabs */}
           <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1">
             {INSTITUTIONS.map((inst) => {
               const active = activeInst === inst.key;
@@ -344,11 +349,13 @@ function InstitutionCoursesPanel({
 }) {
   const [query, setQuery] = useState("");
   const [facultyFilter, setFacultyFilter] = useState<string>("All");
+  const [levelFilter, setLevelFilter] = useState<string>("All");
   const [onlyEligible, setOnlyEligible] = useState(false);
   const [scraped, setScraped] = useState<ScrapedCourseRow[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [status, setStatus] = useState<string>("Retrieving course catalog from official website…");
+  const [status, setStatus] = useState<string>("Retrieving full course catalog from official site…");
+  const [selectedCourse, setSelectedCourse] = useState<EvaluatedCourse | null>(null);
 
   const listFn = useServerFn(listScrapedCourses);
   const scrapeFn = useServerFn(scrapeInstitution);
@@ -358,11 +365,11 @@ function InstitutionCoursesPanel({
     (async () => {
       try {
         setLoading(true);
-        setStatus(`Querying ${inst.fullName} catalog…`);
+        setStatus(`Querying ${inst.fullName} official catalog…`);
         const rows = await listFn({ data: { institutionKey: inst.key } });
         if (cancelled) return;
         if (rows.length === 0) {
-          setStatus(`Scanning live pages from ${inst.fullName}…`);
+          setStatus(`Scanning live web pages from ${inst.fullName}…`);
           setRefreshing(true);
           const res = await scrapeFn({ data: { institutionKey: inst.key } });
           if (cancelled) return;
@@ -371,7 +378,7 @@ function InstitutionCoursesPanel({
           setScraped(rows);
         }
       } catch (e) {
-        setStatus(`Showing accredited catalog dataset (${(e as Error).message})`);
+        setStatus(`Showing official accredited catalog dataset (${(e as Error).message})`);
         setScraped([]);
       } finally {
         if (!cancelled) {
@@ -419,8 +426,20 @@ function InstitutionCoursesPanel({
       ...f,
       courses: f.courses.filter((c) => {
         if (facultyFilter !== "All" && facultyFilter !== f.name) return false;
+        if (levelFilter !== "All") {
+          const nameLower = c.name.toLowerCase();
+          if (levelFilter === "Degree" && !nameLower.includes("bachelor") && !nameLower.includes("degree")) return false;
+          if (levelFilter === "Diploma" && !nameLower.includes("diploma")) return false;
+          if (levelFilter === "Certificate" && !nameLower.includes("certificate")) return false;
+        }
         if (onlyEligible && !c.eligible) return false;
-        if (query && !c.name.toLowerCase().includes(query.toLowerCase())) return false;
+        if (query) {
+          const q = query.toLowerCase();
+          const matchName = c.name.toLowerCase().includes(q);
+          const matchFaculty = f.name.toLowerCase().includes(q);
+          const matchReqs = c.requirements.some((r) => r.subject.toLowerCase().includes(q));
+          if (!matchName && !matchFaculty && !matchReqs) return false;
+        }
         return true;
       }),
     }))
@@ -437,17 +456,26 @@ function InstitutionCoursesPanel({
         style={{ background: `var(--color-${inst.key.toLowerCase()})` }}
       />
 
-      {/* Header Info */}
+      {/* Institution Header */}
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <GraduationCap className="h-5 w-5 text-[var(--neon-cyan)]" />
+            <GraduationCap className="h-6 w-6 text-[var(--neon-cyan)]" />
             <h3 className="text-xl sm:text-2xl font-black font-display tracking-tight">
               {inst.fullName}
             </h3>
           </div>
-          <p className="text-[11px] text-white/50 mt-0.5">
-            Official Courses & Requirements Offered by <span className="font-semibold text-white/80">{inst.name}</span>
+          <p className="text-[11px] text-white/50 mt-1 flex items-center gap-2">
+            <span>All official qualifications offered at <strong className="text-white">{inst.name}</strong></span>
+            <span>•</span>
+            <a
+              href={inst.officialSite}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[var(--neon-cyan)] hover:underline"
+            >
+              <Globe className="h-3 w-3" /> Official Web Portal
+            </a>
           </p>
         </div>
 
@@ -460,22 +488,22 @@ function InstitutionCoursesPanel({
             }`}
           >
             <Globe className="h-3.5 w-3.5" />
-            {usingLive ? "Retrieved Live from Site" : "Accredited Catalog"}
+            {usingLive ? "Retrieved Live from Web" : "Accredited Directory"}
           </div>
 
           <button
             onClick={refresh}
             disabled={refreshing}
             className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold hover:bg-white/10 disabled:opacity-40 transition"
-            title="Trigger live website scraper to re-fetch official course pages"
+            title="Trigger live web scraper on official university pages"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`} />
-            {refreshing ? "Scanning…" : "Re-sync Web Data"}
+            {refreshing ? "Scanning…" : "Re-sync Web Site"}
           </button>
         </div>
       </div>
 
-      {/* Status / Loading indicator */}
+      {/* Loading state */}
       {loading ? (
         <div className="py-12 text-center space-y-3">
           <Radar className="mx-auto h-8 w-8 text-[var(--neon-cyan)] animate-spin" />
@@ -483,14 +511,14 @@ function InstitutionCoursesPanel({
         </div>
       ) : (
         <>
-          {/* Controls Bar */}
+          {/* Search and Filters Bar */}
           <div className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-xs">
                 <span className="inline-flex items-center gap-1 rounded-full bg-[var(--success)]/15 border border-[var(--success)]/40 px-2.5 py-1 text-[var(--success)] font-bold">
-                  <Zap className="h-3 w-3" /> {eligibleTotal} Courses Qualified
+                  <Zap className="h-3 w-3" /> {eligibleTotal} Qualified
                 </span>
-                <span className="text-white/40">of {totalCount} offered</span>
+                <span className="text-white/40">out of {totalCount} total courses offered</span>
               </div>
 
               <label className="inline-flex items-center gap-2 text-xs text-white/70 cursor-pointer">
@@ -500,19 +528,50 @@ function InstitutionCoursesPanel({
                   onChange={(e) => setOnlyEligible(e.target.checked)}
                   className="accent-[var(--neon-cyan)] rounded"
                 />
-                Show only programs I qualify for
+                Show only courses I qualify for
               </label>
             </div>
 
-            {/* Search Input */}
+            {/* Comprehensive Search Input */}
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={`Search ${inst.name} courses or majors…`}
-                className="w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 py-2 text-sm focus:border-[var(--neon-cyan)]/60 focus:outline-none"
+                placeholder={`Search any course, degree, diploma, major, or subject (e.g. Medicine, Nursing, Engineering, Accounting, Law)…`}
+                className="w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 py-2.5 text-sm focus:border-[var(--neon-cyan)]/60 focus:outline-none placeholder:text-white/30"
               />
+              {query && (
+                <button
+                  onClick={() => setQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Level Filter Pills */}
+            <div className="flex flex-wrap items-center gap-1.5 text-xs">
+              <span className="text-white/40 text-[11px] mr-1 flex items-center gap-1">
+                <Filter className="h-3 w-3" /> Level:
+              </span>
+              {(["All", "Degree", "Diploma", "Certificate"] as const).map((lvl) => {
+                const active = levelFilter === lvl;
+                return (
+                  <button
+                    key={lvl}
+                    onClick={() => setLevelFilter(lvl)}
+                    className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold border transition ${
+                      active
+                        ? "border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)]"
+                        : "border-white/10 bg-white/5 text-white/60 hover:text-white"
+                    }`}
+                  >
+                    {lvl === "All" ? "All Levels" : lvl}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Faculty Pills */}
@@ -525,7 +584,7 @@ function InstitutionCoursesPanel({
                     onClick={() => setFacultyFilter(fac)}
                     className={`rounded-lg px-3 py-1 text-[11px] font-semibold border transition ${
                       active
-                        ? "border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)]"
+                        ? "border-[var(--neon-violet)] bg-[var(--neon-violet)]/20 text-[var(--neon-violet)]"
                         : "border-white/10 bg-white/5 text-white/60 hover:text-white"
                     }`}
                   >
@@ -537,22 +596,33 @@ function InstitutionCoursesPanel({
           </div>
 
           {/* Courses List Grouped by Faculty */}
-          <div className="space-y-6 max-h-[560px] overflow-y-auto pr-1">
+          <div className="space-y-6 max-h-[580px] overflow-y-auto pr-1">
             {filtered.length === 0 && (
-              <div className="text-center py-10 text-sm text-white/50 border border-dashed border-white/10 rounded-xl p-6">
-                No courses match your current search or filter criteria.
+              <div className="text-center py-12 text-sm text-white/50 border border-dashed border-white/10 rounded-xl p-6 space-y-2">
+                <div>No courses found matching "{query || facultyFilter}".</div>
+                <button
+                  onClick={() => {
+                    setQuery("");
+                    setFacultyFilter("All");
+                    setLevelFilter("All");
+                    setOnlyEligible(false);
+                  }}
+                  className="text-xs text-[var(--neon-cyan)] underline font-semibold"
+                >
+                  Reset search & filters
+                </button>
               </div>
             )}
             {filtered.map((f) => (
-              <div key={f.name} className="space-y-2">
-                <div className="flex items-center gap-2 text-xs font-bold text-white/60 uppercase tracking-wider border-b border-white/10 pb-1.5">
+              <div key={f.name} className="space-y-2.5">
+                <div className="flex items-center gap-2 text-xs font-bold text-white/70 uppercase tracking-wider border-b border-white/10 pb-1.5">
                   <BookOpen className="h-3.5 w-3.5 text-[var(--neon-violet)]" />
                   <span>{f.name}</span>
                   <span className="text-[10px] text-white/30 font-normal">({f.courses.length} courses)</span>
                 </div>
                 <div className="grid gap-2 sm:grid-cols-1">
                   {f.courses.map((c) => (
-                    <CourseCard key={c.name} c={c} />
+                    <CourseCard key={c.name} c={c} onClick={() => setSelectedCourse(c)} />
                   ))}
                 </div>
               </div>
@@ -560,36 +630,48 @@ function InstitutionCoursesPanel({
           </div>
         </>
       )}
+
+      {/* Course Detail Modal */}
+      {selectedCourse && (
+        <CourseDetailsModal
+          course={selectedCourse}
+          inst={inst}
+          onClose={() => setSelectedCourse(null)}
+        />
+      )}
     </div>
   );
 }
 
-function CourseCard({ c }: { c: EvaluatedCourse }) {
+function CourseCard({ c, onClick }: { c: EvaluatedCourse; onClick: () => void }) {
   return (
     <div
-      className={`rounded-xl border p-3.5 transition ${
+      onClick={onClick}
+      className={`rounded-xl border p-3.5 transition cursor-pointer ${
         c.eligible
-          ? "border-[var(--success)]/40 bg-[var(--success)]/10 hover:bg-[var(--success)]/15"
-          : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"
+          ? "border-[var(--success)]/40 bg-[var(--success)]/10 hover:bg-[var(--success)]/20 shadow-[0_0_15px_rgba(0,255,150,0.08)]"
+          : "border-white/10 bg-white/[0.03] hover:bg-white/[0.07]"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="font-bold text-sm leading-snug text-white">{c.name}</div>
-          <div className="text-[11px] text-white/50 mt-0.5 flex items-center gap-2">
-            <span>Duration: {c.duration}</span>
+          <div className="font-bold text-sm leading-snug text-white flex items-center gap-2">
+            <span>{c.name}</span>
+          </div>
+          <div className="text-[11px] text-white/50 mt-1 flex items-center gap-3">
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3 text-white/30" /> {c.duration}
+            </span>
             {c.sourceUrl && (
-              <>
-                <span>•</span>
-                <a
-                  href={c.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[10px] text-[var(--neon-cyan)] hover:underline"
-                >
-                  <ExternalLink className="h-2.5 w-2.5" /> Official Site
-                </a>
-              </>
+              <a
+                href={c.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1 text-[10px] text-[var(--neon-cyan)] hover:underline"
+              >
+                <ExternalLink className="h-2.5 w-2.5" /> Official Site Page
+              </a>
             )}
           </div>
         </div>
@@ -600,17 +682,17 @@ function CourseCard({ c }: { c: EvaluatedCourse }) {
           </span>
         ) : (
           <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-[var(--warning)]/15 border border-[var(--warning)]/40 px-2.5 py-1 text-[11px] font-bold text-[var(--warning)]">
-            <AlertTriangle className="h-3.5 w-3.5" /> Missing Requirements
+            <AlertTriangle className="h-3.5 w-3.5" /> Missing Prerequisites
           </span>
         )}
       </div>
 
-      {/* Points Comparison */}
+      {/* Points & Requirements Summary */}
       <div className="mt-3 flex items-center justify-between text-xs border-t border-white/10 pt-2">
         <div className="flex items-center gap-2">
-          <span className="text-white/50 text-[11px]">Required Points:</span>
+          <span className="text-white/50 text-[11px]">Points:</span>
           <span className="font-bold tabular-nums font-display neon-cyan">{c.learnerPoints}</span>
-          <span className="text-white/40">/ {c.minPoints} min</span>
+          <span className="text-white/40">/ {c.minPoints} min required</span>
         </div>
         <span className="text-[10px] uppercase tracking-widest text-white/40 font-mono">
           Rule: Best {c.bestN}
@@ -619,7 +701,7 @@ function CourseCard({ c }: { c: EvaluatedCourse }) {
 
       {/* Missing Requirements List */}
       {!c.eligible && c.missing.length > 0 && (
-        <ul className="mt-2 text-[11px] text-white/70 space-y-1 bg-black/20 rounded-lg p-2 border border-white/5">
+        <ul className="mt-2 text-[11px] text-white/70 space-y-1 bg-black/30 rounded-lg p-2 border border-white/5">
           {c.missing.map((m) => (
             <li key={m} className="flex items-center gap-1.5 text-[var(--warning)]">
               <span className="text-xs">•</span>
@@ -632,10 +714,119 @@ function CourseCard({ c }: { c: EvaluatedCourse }) {
       {/* Subject Prerequisites */}
       {c.requirements.length > 0 && (
         <div className="mt-2 text-[10px] text-white/50 pt-1">
-          <span className="font-semibold text-white/70">Subject Prerequisites: </span>
+          <span className="font-semibold text-white/70">Required Subjects: </span>
           {c.requirements.map((r) => `${r.subject} ≥ ${r.minGrade}`).join(" · ")}
         </div>
       )}
+    </div>
+  );
+}
+
+function CourseDetailsModal({
+  course,
+  inst,
+  onClose,
+}: {
+  course: EvaluatedCourse;
+  inst: Institution;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={onClose} />
+      <div className="relative w-full max-w-lg glass-strong border border-white/15 rounded-2xl p-6 shadow-2xl space-y-5 animate-scale-up z-10">
+        <div className="flex items-start justify-between gap-3 border-b border-white/10 pb-4">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--neon-cyan)] font-bold">
+              {inst.fullName}
+            </div>
+            <h3 className="text-lg font-black font-display text-white mt-1 leading-snug">
+              {course.name}
+            </h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="grid h-8 w-8 place-items-center rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Status Badge & Duration */}
+        <div className="grid grid-cols-2 gap-3 text-xs">
+          <div className="rounded-xl border border-white/10 bg-black/40 p-3">
+            <div className="text-[10px] uppercase tracking-wider text-white/50">Status</div>
+            <div className="mt-1 font-bold">
+              {course.eligible ? (
+                <span className="text-[var(--success)] flex items-center gap-1">
+                  <CheckCircle2 className="h-4 w-4" /> Qualified for Admission
+                </span>
+              ) : (
+                <span className="text-[var(--warning)] flex items-center gap-1">
+                  <AlertTriangle className="h-4 w-4" /> Missing Requirements
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-white/10 bg-black/40 p-3">
+            <div className="text-[10px] uppercase tracking-wider text-white/50">Duration</div>
+            <div className="mt-1 font-bold text-white flex items-center gap-1">
+              <Clock className="h-4 w-4 text-[var(--neon-violet)]" /> {course.duration}
+            </div>
+          </div>
+        </div>
+
+        {/* Points Matrix */}
+        <div className="rounded-xl border border-white/10 bg-black/40 p-4 space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-white/60">Minimum Required Points:</span>
+            <span className="font-bold font-display text-white">{course.minPoints} points</span>
+          </div>
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-white/60">Your Points ({course.bestN === 5 ? "Best 5" : "Best 6"}):</span>
+            <span className="font-bold font-display neon-cyan">{course.learnerPoints} points</span>
+          </div>
+        </div>
+
+        {/* Requirements Details */}
+        <div className="space-y-2">
+          <div className="text-xs font-bold text-white/70 flex items-center gap-1.5">
+            <Award className="h-4 w-4 text-[var(--neon-cyan)]" /> Subject Grade Requirements
+          </div>
+          {course.requirements.length === 0 ? (
+            <div className="text-xs text-white/50">General admission point requirements apply.</div>
+          ) : (
+            <div className="grid gap-1.5">
+              {course.requirements.map((r) => (
+                <div key={r.subject} className="flex items-center justify-between text-xs bg-white/5 rounded-lg px-3 py-2 border border-white/5">
+                  <span className="font-semibold text-white/90">{r.subject}</span>
+                  <span className="font-mono text-white/70">Grade ≥ {r.minGrade}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Links & Close */}
+        <div className="pt-2 flex items-center justify-between gap-3">
+          <a
+            href={course.sourceUrl ?? inst.officialSite}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] px-4 py-2.5 text-xs font-bold text-[#0b0f19] hover:scale-[1.02] transition"
+          >
+            <ExternalLink className="h-4 w-4" /> Open Official {inst.name} Page
+          </a>
+
+          <button
+            onClick={onClose}
+            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-semibold text-white/80 hover:bg-white/10 transition"
+          >
+            Close
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
