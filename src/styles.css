@@ -78,6 +78,10 @@
   --nust: oklch(0.75 0.18 220);
   --ium: oklch(0.78 0.2 145);
   --welwitchia: oklch(0.82 0.18 60);
+  --tc: oklch(0.72 0.2 300);
+  --iol: oklch(0.75 0.2 180);
+  --sbs: oklch(0.7 0.2 260);
+  --nipam: oklch(0.78 0.18 100);
 }
 
 @layer base {
