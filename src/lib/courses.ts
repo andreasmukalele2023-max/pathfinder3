@@ -19,7 +19,7 @@ export interface Faculty {
 }
 
 export interface Institution {
-  key: "UNAM" | "NUST" | "IUM" | "Welwitchia";
+  key: "UNAM" | "NUST" | "IUM" | "Welwitchia" | "TC" | "IOL" | "SBS" | "NIPAM";
   name: string;
   fullName: string;
   faculties: Faculty[];
