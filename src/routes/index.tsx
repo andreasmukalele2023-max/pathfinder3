@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import {
   SUBJECTS,
   NSSCO_GRADES,
@@ -7,11 +8,13 @@ import {
   type SubjectEntry,
   type Level,
   type Grade,
+  type NSSCOGrade,
   calcTotal,
   findSubject,
   gradeMeets,
 } from "@/lib/points";
-import { INSTITUTIONS, type Institution, type Course } from "@/lib/courses";
+import { INSTITUTIONS, type Institution, type Course, type Faculty } from "@/lib/courses";
+import { scrapeInstitution, listScrapedCourses, type ScrapedCourseRow } from "@/lib/scrape.functions";
 import {
   Sparkles,
   Plus,
@@ -23,7 +26,10 @@ import {
   Zap,
   Radar,
   Cpu,
+  RefreshCw,
+  Globe,
 } from "lucide-react";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
