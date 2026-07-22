@@ -32,9 +32,9 @@ import {
   GraduationCap,
   X,
   Filter,
-  Info,
   Award,
   Clock,
+  ArrowRight,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -64,6 +64,7 @@ function HomePage() {
     newRow(""),
   ]);
   const [activeInst, setActiveInst] = useState<Institution["key"]>("UNAM");
+  const [globalQuery, setGlobalQuery] = useState("");
 
   const update = (id: string, patch: Partial<SubjectEntry>) =>
     setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));
@@ -131,7 +132,7 @@ function HomePage() {
           </div>
         </section>
 
-        {/* Right Panel: Metrics + Institution Selector + All Offered Courses */}
+        {/* Right Panel: Metrics + Institution Selector + Offered Courses */}
         <section className="space-y-4 min-w-0">
           <div className="glass rounded-2xl p-4 sm:p-5">
             <div className="grid grid-cols-3 gap-3">
@@ -167,7 +168,14 @@ function HomePage() {
           </div>
 
           {/* Institution Courses Catalog Panel */}
-          <InstitutionCoursesPanel key={active.key} inst={active} entries={entries} />
+          <InstitutionCoursesPanel
+            key={active.key}
+            inst={active}
+            entries={entries}
+            query={globalQuery}
+            onQueryChange={setGlobalQuery}
+            onSelectInst={(k) => setActiveInst(k)}
+          />
         </section>
       </main>
     </div>
@@ -340,14 +348,26 @@ function scrapedToFaculties(rows: ScrapedCourseRow[]): Faculty[] {
   return Array.from(map.entries()).map(([name, courses]) => ({ name, courses }));
 }
 
+function matchQueryTokens(c: Course, fName: string, instName: string, instFullName: string, query: string): boolean {
+  if (!query.trim()) return true;
+  const tokens = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
+  const text = `${c.name} ${fName} ${instName} ${instFullName} ${c.duration} ${c.requirements.map(r => `${r.subject} ${r.minGrade}`).join(" ")}`.toLowerCase();
+  return tokens.every((token) => text.includes(token));
+}
+
 function InstitutionCoursesPanel({
   inst,
   entries,
+  query,
+  onQueryChange,
+  onSelectInst,
 }: {
   inst: Institution;
   entries: SubjectEntry[];
+  query: string;
+  onQueryChange: (q: string) => void;
+  onSelectInst: (key: Institution["key"]) => void;
 }) {
-  const [query, setQuery] = useState("");
   const [facultyFilter, setFacultyFilter] = useState<string>("All");
   const [levelFilter, setLevelFilter] = useState<string>("All");
   const [onlyEligible, setOnlyEligible] = useState(false);
@@ -433,17 +453,29 @@ function InstitutionCoursesPanel({
           if (levelFilter === "Certificate" && !nameLower.includes("certificate")) return false;
         }
         if (onlyEligible && !c.eligible) return false;
-        if (query) {
-          const q = query.toLowerCase();
-          const matchName = c.name.toLowerCase().includes(q);
-          const matchFaculty = f.name.toLowerCase().includes(q);
-          const matchReqs = c.requirements.some((r) => r.subject.toLowerCase().includes(q));
-          if (!matchName && !matchFaculty && !matchReqs) return false;
-        }
+        if (!matchQueryTokens(c, f.name, inst.name, inst.fullName, query)) return false;
         return true;
       }),
     }))
     .filter((f) => f.courses.length > 0);
+
+  // Cross-institution match counter
+  const otherMatches = useMemo(() => {
+    if (!query.trim()) return [];
+    return INSTITUTIONS.filter((i) => i.key !== inst.key)
+      .map((otherInst) => {
+        let count = 0;
+        for (const f of otherInst.faculties) {
+          for (const c of f.courses) {
+            if (matchQueryTokens(c, f.name, otherInst.name, otherInst.fullName, query)) {
+              count++;
+            }
+          }
+        }
+        return { inst: otherInst, count };
+      })
+      .filter((m) => m.count > 0);
+  }, [query, inst.key]);
 
   const eligibleTotal = evaluated.reduce((a, f) => a + f.courses.filter((c) => c.eligible).length, 0);
   const totalCount = evaluated.reduce((a, f) => a + f.courses.length, 0);
@@ -537,19 +569,41 @@ function InstitutionCoursesPanel({
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
               <input
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={`Search any course, degree, diploma, major, or subject (e.g. Medicine, Nursing, Engineering, Accounting, Law)…`}
+                onChange={(e) => onQueryChange(e.target.value)}
+                placeholder={`Search any course across all institutions (e.g. Medicine, Nursing, Engineering, Accounting, Law, Computer)…`}
                 className="w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 py-2.5 text-sm focus:border-[var(--neon-cyan)]/60 focus:outline-none placeholder:text-white/30"
               />
               {query && (
                 <button
-                  onClick={() => setQuery("")}
+                  onClick={() => onQueryChange("")}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
                 >
                   <X className="h-4 w-4" />
                 </button>
               )}
             </div>
+
+            {/* Cross-Institution Match Alert */}
+            {otherMatches.length > 0 && (
+              <div className="rounded-xl border border-[var(--neon-cyan)]/30 bg-[var(--neon-cyan)]/10 p-3 text-xs space-y-2 animate-fade-in">
+                <div className="font-semibold text-[var(--neon-cyan)] flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5" /> Courses matching "{query}" found at other universities:
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {otherMatches.map(({ inst: other, count }) => (
+                    <button
+                      key={other.key}
+                      onClick={() => onSelectInst(other.key)}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/40 px-2.5 py-1 text-white hover:border-[var(--neon-cyan)] hover:bg-[var(--neon-cyan)]/20 transition"
+                    >
+                      <span className="font-bold text-[var(--neon-cyan)]">{other.name}:</span>
+                      <span>{count} courses</span>
+                      <ArrowRight className="h-3 w-3 text-[var(--neon-cyan)]" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Level Filter Pills */}
             <div className="flex flex-wrap items-center gap-1.5 text-xs">
@@ -599,18 +653,25 @@ function InstitutionCoursesPanel({
           <div className="space-y-6 max-h-[580px] overflow-y-auto pr-1">
             {filtered.length === 0 && (
               <div className="text-center py-12 text-sm text-white/50 border border-dashed border-white/10 rounded-xl p-6 space-y-2">
-                <div>No courses found matching "{query || facultyFilter}".</div>
-                <button
-                  onClick={() => {
-                    setQuery("");
-                    setFacultyFilter("All");
-                    setLevelFilter("All");
-                    setOnlyEligible(false);
-                  }}
-                  className="text-xs text-[var(--neon-cyan)] underline font-semibold"
-                >
-                  Reset search & filters
-                </button>
+                <div>No courses found matching "{query}" at {inst.name}.</div>
+                {otherMatches.length > 0 && (
+                  <div className="text-xs text-white/70">
+                    Try selecting one of the other institutions above to view matching courses!
+                  </div>
+                )}
+                <div>
+                  <button
+                    onClick={() => {
+                      onQueryChange("");
+                      setFacultyFilter("All");
+                      setLevelFilter("All");
+                      setOnlyEligible(false);
+                    }}
+                    className="text-xs text-[var(--neon-cyan)] underline font-semibold mt-1"
+                  >
+                    Reset search & filters
+                  </button>
+                </div>
               </div>
             )}
             {filtered.map((f) => (
