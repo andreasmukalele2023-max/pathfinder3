@@ -195,4 +195,103 @@ export const INSTITUTIONS: Institution[] = [
       },
     ],
   },
+  {
+    key: "TC",
+    name: "TC",
+    fullName: "Triumphant College",
+    faculties: [
+      {
+        name: "Business & Management",
+        courses: [
+          { name: "Bachelor of Business Administration", duration: "3 years", minPoints: 24, bestN: 5, requirements: [{ subject: "English", minGrade: "D" }] },
+          { name: "Bachelor of Accounting", duration: "3 years", minPoints: 26, bestN: 5, requirements: [{ subject: "English", minGrade: "D" }, { subject: "Mathematics", minGrade: "D" }] },
+          { name: "Diploma in Human Resources Management", duration: "2 years", minPoints: 20, bestN: 5, requirements: [{ subject: "English", minGrade: "E" }] },
+        ],
+      },
+      {
+        name: "Information Technology",
+        courses: [
+          { name: "Bachelor of Information Technology", duration: "3 years", minPoints: 25, bestN: 5, requirements: [{ subject: "English", minGrade: "D" }, { subject: "Mathematics", minGrade: "D" }] },
+          { name: "Diploma in Information Technology", duration: "2 years", minPoints: 20, bestN: 5, requirements: [{ subject: "English", minGrade: "E" }] },
+        ],
+      },
+      {
+        name: "Public Relations & Media",
+        courses: [
+          { name: "Diploma in Public Relations", duration: "2 years", minPoints: 20, bestN: 5, requirements: [{ subject: "English", minGrade: "D" }] },
+          { name: "Diploma in Journalism & Media Studies", duration: "2 years", minPoints: 20, bestN: 5, requirements: [{ subject: "English", minGrade: "D" }] },
+        ],
+      },
+    ],
+  },
+  {
+    key: "IOL",
+    name: "IOL",
+    fullName: "Institute of Open Learning",
+    faculties: [
+      {
+        name: "Education",
+        courses: [
+          { name: "Diploma in Early Childhood Development", duration: "3 years", minPoints: 20, bestN: 5, requirements: [{ subject: "English", minGrade: "E" }] },
+          { name: "Bachelor of Education (Pre & Lower Primary)", duration: "4 years", minPoints: 25, bestN: 6, requirements: [{ subject: "English", minGrade: "D" }] },
+        ],
+      },
+      {
+        name: "Business Studies",
+        courses: [
+          { name: "Diploma in Business Management", duration: "3 years", minPoints: 22, bestN: 5, requirements: [{ subject: "English", minGrade: "D" }] },
+          { name: "Certificate in Bookkeeping & Accounting", duration: "1 year", minPoints: 18, bestN: 5, requirements: [{ subject: "English", minGrade: "E" }, { subject: "Mathematics", minGrade: "E" }] },
+        ],
+      },
+      {
+        name: "Information Technology",
+        courses: [
+          { name: "Diploma in Information Technology", duration: "3 years", minPoints: 22, bestN: 5, requirements: [{ subject: "English", minGrade: "D" }, { subject: "Mathematics", minGrade: "E" }] },
+        ],
+      },
+    ],
+  },
+  {
+    key: "SBS",
+    name: "SBS",
+    fullName: "Southern Business School Namibia",
+    faculties: [
+      {
+        name: "Commerce & Management",
+        courses: [
+          { name: "Bachelor of Commerce", duration: "3 years", minPoints: 26, bestN: 5, requirements: [{ subject: "English", minGrade: "D" }, { subject: "Mathematics", minGrade: "D" }] },
+          { name: "Bachelor of Business Administration", duration: "3 years", minPoints: 25, bestN: 5, requirements: [{ subject: "English", minGrade: "D" }] },
+          { name: "Higher Certificate in Management", duration: "1 year", minPoints: 18, bestN: 5, requirements: [{ subject: "English", minGrade: "E" }] },
+        ],
+      },
+      {
+        name: "Policing & Safety",
+        courses: [
+          { name: "Bachelor of Policing Practices", duration: "3 years", minPoints: 24, bestN: 5, requirements: [{ subject: "English", minGrade: "D" }] },
+          { name: "Higher Certificate in Policing", duration: "1 year", minPoints: 18, bestN: 5, requirements: [{ subject: "English", minGrade: "E" }] },
+        ],
+      },
+    ],
+  },
+  {
+    key: "NIPAM",
+    name: "NIPAM",
+    fullName: "Namibia Institute of Public Administration & Management",
+    faculties: [
+      {
+        name: "Public Administration",
+        courses: [
+          { name: "Certificate in Public Administration", duration: "1 year", minPoints: 20, bestN: 5, requirements: [{ subject: "English", minGrade: "D" }] },
+          { name: "Diploma in Public Administration", duration: "2 years", minPoints: 24, bestN: 5, requirements: [{ subject: "English", minGrade: "C" }] },
+        ],
+      },
+      {
+        name: "Leadership & Governance",
+        courses: [
+          { name: "Executive Development Programme", duration: "1 year", minPoints: 22, bestN: 5, requirements: [{ subject: "English", minGrade: "D" }] },
+          { name: "Diploma in Local Governance", duration: "2 years", minPoints: 24, bestN: 5, requirements: [{ subject: "English", minGrade: "C" }] },
+        ],
+      },
+    ],
+  },
 ];
