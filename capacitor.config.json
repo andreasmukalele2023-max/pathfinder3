@@ -1,0 +1,9 @@
+{
+  "appId": "com.namibia.pointsmatrix",
+  "appName": "Namibia Points Matrix",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}

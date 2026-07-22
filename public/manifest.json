@@ -1,0 +1,17 @@
+{
+  "name": "Namibia Points Matrix",
+  "short_name": "PointsMatrix",
+  "description": "Namibia Grade 12 Admission Points Calculator and Tertiary Course Finder",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0f19",
+  "theme_color": "#00f3ff",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
