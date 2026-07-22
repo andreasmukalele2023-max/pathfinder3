@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import {
   SUBJECTS,
   NSSCO_GRADES,
@@ -7,11 +8,13 @@ import {
   type SubjectEntry,
   type Level,
   type Grade,
+  type NSSCOGrade,
   calcTotal,
   findSubject,
   gradeMeets,
 } from "@/lib/points";
-import { INSTITUTIONS, type Institution, type Course } from "@/lib/courses";
+import { INSTITUTIONS, type Institution, type Course, type Faculty } from "@/lib/courses";
+import { scrapeInstitution, listScrapedCourses, type ScrapedCourseRow } from "@/lib/scrape.functions";
 import {
   Sparkles,
   Plus,
@@ -23,7 +26,10 @@ import {
   Zap,
   Radar,
   Cpu,
+  RefreshCw,
+  Globe,
 } from "lucide-react";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -378,6 +384,30 @@ function evaluateCourse(c: Course, entries: SubjectEntry[], instKey: Institution
   return { ...c, learnerPoints, missing, eligible: missing.length === 0 };
 }
 
+function scrapedToFaculties(rows: ScrapedCourseRow[]): Faculty[] {
+  const map = new Map<string, Course[]>();
+  const validGrades = new Set(["A*", "A", "B", "C", "D", "E"]);
+  for (const r of rows) {
+    const fac = (r.faculty && r.faculty.trim()) || "Other Programmes";
+    const reqs = (r.requirements ?? [])
+      .map((req) => ({
+        subject: String(req.subject).trim(),
+        minGrade: (String(req.minGrade).toUpperCase().replace(/[^A-EU*]/g, "") as NSSCOGrade),
+      }))
+      .filter((req) => req.subject && validGrades.has(req.minGrade));
+    const course: Course = {
+      name: r.name,
+      duration: r.duration ?? "—",
+      minPoints: typeof r.min_points === "number" ? r.min_points : 0,
+      bestN: r.best_n === 5 ? 5 : 6,
+      requirements: reqs,
+    };
+    if (!map.has(fac)) map.set(fac, []);
+    map.get(fac)!.push(course);
+  }
+  return Array.from(map.entries()).map(([name, courses]) => ({ name, courses }));
+}
+
 function CoursesModal({
   inst,
   entries,
@@ -387,28 +417,82 @@ function CoursesModal({
   entries: SubjectEntry[];
   onClose: () => void;
 }) {
-  const [scanning, setScanning] = useState(true);
   const [query, setQuery] = useState("");
   const [facultyFilter, setFacultyFilter] = useState<string>("All");
   const [onlyEligible, setOnlyEligible] = useState(false);
+  const [scraped, setScraped] = useState<ScrapedCourseRow[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [status, setStatus] = useState<string>("Fetching live catalog…");
+
+  const listFn = useServerFn(listScrapedCourses);
+  const scrapeFn = useServerFn(scrapeInstitution);
 
   useEffect(() => {
-    const t = setTimeout(() => setScanning(false), 1100);
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("keydown", onKey);
-    };
+    return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoading(true);
+        setStatus("Loading cached catalog…");
+        const rows = await listFn({ data: { institutionKey: inst.key } });
+        if (cancelled) return;
+        if (rows.length === 0) {
+          setStatus(`Fetching live data from ${inst.fullName}…`);
+          setRefreshing(true);
+          const res = await scrapeFn({ data: { institutionKey: inst.key } });
+          if (cancelled) return;
+          setScraped(res.courses ?? []);
+        } else {
+          setScraped(rows);
+        }
+      } catch (e) {
+        setStatus(`Live fetch failed — showing curated data. (${(e as Error).message})`);
+        setScraped([]);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+          setRefreshing(false);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [inst.key, inst.fullName, listFn, scrapeFn]);
+
+  const refresh = async () => {
+    try {
+      setRefreshing(true);
+      setStatus(`Re-scanning ${inst.fullName}…`);
+      const res = await scrapeFn({ data: { institutionKey: inst.key } });
+      setScraped(res.courses ?? []);
+    } catch (e) {
+      setStatus(`Refresh failed: ${(e as Error).message}`);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const faculties: Faculty[] = useMemo(() => {
+    if (scraped && scraped.length > 0) return scrapedToFaculties(scraped);
+    return inst.faculties;
+  }, [scraped, inst.faculties]);
+
+  const usingLive = !!(scraped && scraped.length > 0);
 
   const evaluated = useMemo(
     () =>
-      inst.faculties.map((f) => ({
+      faculties.map((f) => ({
         ...f,
         courses: f.courses.map((c) => evaluateCourse(c, entries, inst.key)),
       })),
-    [inst, entries],
+    [faculties, entries, inst.key],
   );
 
   const filtered = evaluated
@@ -424,6 +508,7 @@ function CoursesModal({
     .filter((f) => f.courses.length > 0);
 
   const eligibleTotal = evaluated.reduce((a, f) => a + f.courses.filter((c) => c.eligible).length, 0);
+  const totalCount = evaluated.reduce((a, f) => a + f.courses.length, 0);
 
   return (
     <div className="fixed inset-0 z-50 animate-fade-in">
@@ -431,9 +516,7 @@ function CoursesModal({
       <aside className="absolute right-0 top-0 h-full w-full sm:w-[560px] md:w-[640px] glass-strong border-l border-white/10 animate-slide-in flex flex-col">
         <div className="px-5 py-4 border-b border-white/10 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-white/50">
-              {inst.fullName}
-            </p>
+            <p className="text-[10px] uppercase tracking-[0.25em] text-white/50">{inst.fullName}</p>
             <h3 className="text-lg sm:text-xl font-black font-display mt-0.5">
               <span className="neon-cyan">{inst.name}</span> Qualifying Courses Matrix
             </h3>
@@ -446,7 +529,7 @@ function CoursesModal({
           </button>
         </div>
 
-        {scanning ? (
+        {loading ? (
           <div className="flex-1 grid place-items-center px-6">
             <div className="text-center space-y-4 animate-fade-in">
               <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-violet)] animate-pulse-glow">
@@ -454,18 +537,38 @@ function CoursesModal({
               </div>
               <div>
                 <div className="text-sm font-bold uppercase tracking-widest neon-cyan">Matching programs</div>
-                <div className="text-xs text-white/50 mt-1">Cross-referencing {inst.faculties.reduce((a, f) => a + f.courses.length, 0)} programs against your profile…</div>
+                <div className="text-xs text-white/50 mt-1">{status}</div>
               </div>
             </div>
           </div>
         ) : (
           <>
             <div className="px-5 py-3 border-b border-white/10 space-y-3">
-              <div className="flex items-center gap-2 text-xs">
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-[var(--success)]/40 bg-[var(--success)]/10 px-2.5 py-1 text-[var(--success)] font-semibold">
-                  <Zap className="h-3 w-3" /> {eligibleTotal} eligible
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-[var(--success)]/40 bg-[var(--success)]/10 px-2.5 py-1 text-[var(--success)] font-semibold">
+                    <Zap className="h-3 w-3" /> {eligibleTotal} eligible
+                  </div>
+                  <div className="text-white/40">of {totalCount}</div>
+                  <div
+                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${
+                      usingLive
+                        ? "border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/10 text-[var(--neon-cyan)]"
+                        : "border-white/10 bg-white/5 text-white/60"
+                    }`}
+                    title={usingLive ? "Fetched live from institution website" : "Fallback curated dataset"}
+                  >
+                    <Globe className="h-2.5 w-2.5" /> {usingLive ? "Live" : "Curated"}
+                  </div>
                 </div>
-                <div className="text-white/40">of {evaluated.reduce((a, f) => a + f.courses.length, 0)} programs</div>
+                <button
+                  onClick={refresh}
+                  disabled={refreshing}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold hover:bg-white/10 disabled:opacity-40 transition"
+                >
+                  <RefreshCw className={`h-3 w-3 ${refreshing ? "animate-spin" : ""}`} />
+                  {refreshing ? "Scanning" : "Refresh"}
+                </button>
               </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
@@ -477,7 +580,7 @@ function CoursesModal({
                 />
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {(["All", ...inst.faculties.map((f) => f.name)]).map((fac) => {
+                {(["All", ...faculties.map((f) => f.name)]).map((fac) => {
                   const active = facultyFilter === fac;
                   return (
                     <button
@@ -535,6 +638,7 @@ function CoursesModal({
     </div>
   );
 }
+
 
 function CourseCard({ c }: { c: EvaluatedCourse }) {
   return (
