@@ -10,9 +10,22 @@ import {
   type Grade,
   type NSSCOGrade,
   calcTotal,
+  calcBreakdown,
   findSubject,
-  gradeMeets,
+  explainEntry,
 } from "@/lib/points";
+import {
+  PROSPECTUS_YEAR,
+  requirementMet,
+  requirementLabel,
+  isNsfafEligible,
+  estimatedFee,
+  deadlineInfo,
+  upgradePlan,
+  type UpgradeStep,
+} from "@/lib/admissions";
+import { CAREERS, careerMatchesCourse, findCareer, type Career } from "@/lib/careers";
+import { exportSummaryPdf } from "@/lib/export-pdf";
 import { INSTITUTIONS, type Institution, type Course, type Faculty } from "@/lib/courses";
 import { scrapeInstitution, listScrapedCourses, type ScrapedCourseRow } from "@/lib/scrape.functions";
 import {
@@ -35,6 +48,12 @@ import {
   Award,
   Clock,
   ArrowRight,
+  Info,
+  Download,
+  Banknote,
+  Wrench,
+  Briefcase,
+  CalendarClock,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -59,8 +78,8 @@ function HomePage() {
     newRow("English"),
     newRow("Mathematics"),
     newRow("Biology"),
-    newRow("Physical Science"),
-    newRow(""),
+    newRow("Chemistry"),
+    newRow("Physics"),
     newRow(""),
   ]);
   const [activeInst, setActiveInst] = useState<Institution["key"]>("UNAM");
@@ -315,9 +334,8 @@ function evaluateCourse(c: Course & { sourceUrl?: string | null }, entries: Subj
   const missing: string[] = [];
   if (learnerPoints < c.minPoints) missing.push(`Need ${c.minPoints} pts (have ${learnerPoints})`);
   for (const req of c.requirements) {
-    const entry = findSubject(entries, req.subject);
-    if (!gradeMeets(entry, req.minGrade)) {
-      missing.push(`${req.subject} ≥ ${req.minGrade}`);
+    if (!requirementMet(req, entries)) {
+      missing.push(requirementLabel(req));
     }
   }
   return { ...c, learnerPoints, missing, eligible: missing.length === 0 };
