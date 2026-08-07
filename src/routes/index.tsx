@@ -188,6 +188,9 @@ function HomePage() {
             </div>
           </div>
 
+          {/* Career Matcher */}
+          <CareerMatcher entries={entries} onSelectInst={setActiveInst} />
+
           {/* Institution Selector Tabs */}
           <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1">
             {INSTITUTIONS.map((inst) => {
@@ -744,7 +747,13 @@ function InstitutionCoursesPanel({
                 </div>
                 <div className="grid gap-2 sm:grid-cols-1">
                   {f.courses.map((c) => (
-                    <CourseCard key={c.name} c={c} onClick={() => setSelectedCourse(c)} />
+                    <CourseCard
+                      key={c.name}
+                      c={c}
+                      inst={inst}
+                      entries={entries}
+                      onClick={() => setSelectedCourse(c)}
+                    />
                   ))}
                 </div>
               </div>
@@ -765,7 +774,25 @@ function InstitutionCoursesPanel({
   );
 }
 
-function CourseCard({ c, onClick }: { c: EvaluatedCourse; onClick: () => void }) {
+function CourseCard({
+  c,
+  inst,
+  entries,
+  onClick,
+}: {
+  c: EvaluatedCourse;
+  inst: Institution;
+  entries: SubjectEntry[];
+  onClick: () => void;
+}) {
+  const [showPlan, setShowPlan] = useState(false);
+  const nsfaf = isNsfafEligible(c, inst.key);
+  const fee = estimatedFee(c, inst.key);
+  const deadline = deadlineInfo(inst);
+  const plan: UpgradeStep[] = useMemo(
+    () => (c.eligible ? [] : upgradePlan(c, entries, inst.key)),
+    [c, entries, inst.key],
+  );
   return (
     <div
       onClick={onClick}
@@ -779,6 +806,19 @@ function CourseCard({ c, onClick }: { c: EvaluatedCourse; onClick: () => void })
         <div className="min-w-0 flex-1">
           <div className="font-bold text-sm leading-snug text-white flex items-center gap-2">
             <span>{c.name}</span>
+          </div>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex items-center gap-1 rounded-full border border-[var(--neon-violet)]/50 bg-[var(--neon-violet)]/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[var(--neon-violet)]">
+              <Sparkles className="h-2.5 w-2.5" /> Updated for {PROSPECTUS_YEAR} Academic Year
+            </span>
+            {nsfaf && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-[var(--success)]/50 bg-[var(--success)]/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[var(--success)]">
+                <Banknote className="h-2.5 w-2.5" /> NSFAF Eligible
+              </span>
+            )}
+            <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-semibold text-white/60">
+              {fee}
+            </span>
           </div>
           <div className="text-[11px] text-white/50 mt-1 flex items-center gap-3">
             <span className="flex items-center gap-1">
@@ -837,7 +877,163 @@ function CourseCard({ c, onClick }: { c: EvaluatedCourse; onClick: () => void })
       {c.requirements.length > 0 && (
         <div className="mt-2 text-[10px] text-white/50 pt-1">
           <span className="font-semibold text-white/70">Required Subjects: </span>
-          {c.requirements.map((r) => `${r.subject} ≥ ${r.minGrade}`).join(" · ")}
+          {c.requirements.map((r) => requirementLabel(r)).join(" · ")}
+        </div>
+      )}
+
+      {/* Upgrade Advisor */}
+      {!c.eligible && plan.length > 0 && (
+        <div className="mt-2.5">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowPlan((v) => !v);
+            }}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--warning)]/40 bg-[var(--warning)]/10 px-2.5 py-1 text-[11px] font-bold text-[var(--warning)] hover:bg-[var(--warning)]/20 transition"
+          >
+            <Wrench className="h-3 w-3" /> {showPlan ? "Hide" : "How to Qualify"}
+          </button>
+          {showPlan && (
+            <div className="mt-2 space-y-2 rounded-lg border border-white/10 bg-black/40 p-2.5 animate-fade-in">
+              <div className="text-[10px] uppercase tracking-widest text-white/50">Upgrade Advisor</div>
+              {plan.map((st) => (
+                <div key={st.text} className="text-[11px]">
+                  <div className="font-semibold text-white">{st.text}</div>
+                  <div className="text-white/55">{st.detail}</div>
+                </div>
+              ))}
+              <div className="text-[10px] text-white/40 pt-1 border-t border-white/5">
+                Upgrade options: NamCOL part-time / distance NSSCO &amp; NSSCAS, or a full-time matric rewrite centre.
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Apply */}
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-2.5">
+        <a
+          href={inst.applyUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] px-3 py-1.5 text-[11px] font-bold text-[#0b0f19] hover:scale-[1.02] transition"
+        >
+          <ExternalLink className="h-3 w-3" /> Apply Now · {inst.portalName}
+        </a>
+        <span
+          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
+            deadline.closed
+              ? "border-[var(--destructive)]/40 bg-[var(--destructive)]/10 text-[var(--destructive)]"
+              : deadline.days <= 30
+              ? "border-[var(--warning)]/40 bg-[var(--warning)]/10 text-[var(--warning)]"
+              : "border-white/10 bg-white/5 text-white/60"
+          }`}
+        >
+          <CalendarClock className="h-3 w-3" /> {deadline.label}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function CareerMatcher({
+  entries,
+  onSelectInst,
+}: {
+  entries: SubjectEntry[];
+  onSelectInst: (k: Institution["key"]) => void;
+}) {
+  const [q, setQ] = useState("");
+  const career: Career | undefined = useMemo(() => findCareer(q), [q]);
+
+  const matches = useMemo(() => {
+    if (!career) return [];
+    const out: { inst: Institution; faculty: string; course: EvaluatedCourse }[] = [];
+    for (const inst of INSTITUTIONS) {
+      for (const f of inst.faculties) {
+        for (const c of f.courses) {
+          if (!careerMatchesCourse(career, c.name)) continue;
+          out.push({ inst, faculty: f.name, course: evaluateCourse(c, entries, inst.key) });
+        }
+      }
+    }
+    return out.sort((a, b) => Number(b.course.eligible) - Number(a.course.eligible));
+  }, [career, entries]);
+
+  return (
+    <div className="glass rounded-2xl p-4 space-y-3">
+      <div className="flex items-center gap-2">
+        <Briefcase className="h-4 w-4 text-[var(--neon-violet)]" />
+        <h3 className="text-sm font-bold">Career Matcher</h3>
+        <span className="text-[10px] text-white/40">Search a career to see the degrees that lead to it</span>
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          list="career-list"
+          placeholder="e.g. Radiographer, Civil Engineer, Accountant, Teacher…"
+          className="w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 py-2.5 text-sm focus:border-[var(--neon-violet)]/60 focus:outline-none placeholder:text-white/30"
+        />
+        <datalist id="career-list">
+          {CAREERS.map((c) => (
+            <option key={c.title} value={c.title} />
+          ))}
+        </datalist>
+      </div>
+
+      {!q.trim() && (
+        <div className="flex flex-wrap gap-1.5">
+          {CAREERS.slice(0, 8).map((c) => (
+            <button
+              key={c.title}
+              onClick={() => setQ(c.title)}
+              className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white/60 hover:text-white hover:border-[var(--neon-violet)]/60 transition"
+            >
+              {c.title}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {q.trim() && !career && (
+        <div className="text-xs text-white/50">No career profile found for “{q}”. Try a broader term such as “engineer”, “nursing” or “law”.</div>
+      )}
+
+      {career && (
+        <div className="space-y-2">
+          <div className="text-xs text-white/60">
+            <strong className="text-white">{career.title}</strong> — {career.blurb} · {matches.length} matching programme(s)
+          </div>
+          <div className="max-h-64 overflow-y-auto space-y-1.5 pr-1">
+            {matches.map(({ inst, faculty, course }) => (
+              <button
+                key={`${inst.key}-${course.name}`}
+                onClick={() => onSelectInst(inst.key)}
+                className={`w-full text-left rounded-lg border px-3 py-2 text-xs transition ${
+                  course.eligible
+                    ? "border-[var(--success)]/40 bg-[var(--success)]/10 hover:bg-[var(--success)]/20"
+                    : "border-white/10 bg-white/[0.03] hover:bg-white/[0.07]"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-semibold text-white">{course.name}</span>
+                  <span className={`shrink-0 text-[10px] font-bold ${course.eligible ? "text-[var(--success)]" : "text-[var(--warning)]"}`}>
+                    {course.eligible ? "Eligible" : "Not yet"}
+                  </span>
+                </div>
+                <div className="text-[10px] text-white/50 mt-0.5">
+                  {inst.name} · {faculty} · {course.duration} · {course.learnerPoints}/{course.minPoints} pts
+                </div>
+              </button>
+            ))}
+            {matches.length === 0 && (
+              <div className="text-xs text-white/50">No programmes in the directory match this career yet.</div>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -922,8 +1118,8 @@ function CourseDetailsModal({
             <div className="grid gap-1.5">
               {course.requirements.map((r) => (
                 <div key={r.subject} className="flex items-center justify-between text-xs bg-white/5 rounded-lg px-3 py-2 border border-white/5">
-                  <span className="font-semibold text-white/90">{r.subject}</span>
-                  <span className="font-mono text-white/70">Grade ≥ {r.minGrade}</span>
+                  <span className="font-semibold text-white/90">{r.anyOf?.join(" / ") ?? r.subject}</span>
+                  <span className="font-mono text-white/70">{requirementLabel(r)}</span>
                 </div>
               ))}
             </div>
