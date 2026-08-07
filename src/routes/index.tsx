@@ -93,6 +93,16 @@ function HomePage() {
   const active = INSTITUTIONS.find((i) => i.key === activeInst)!;
   const best6 = useMemo(() => calcTotal(entries, activeInst, 6), [entries, activeInst]);
   const best5 = useMemo(() => calcTotal(entries, activeInst, 5), [entries, activeInst]);
+  const pointsHint = useMemo(() => {
+    const { rows } = calcBreakdown(entries, activeInst, 6);
+    if (rows.length === 0) return "Enter subjects and grades to see how your points are calculated.";
+    return (
+      `${activeInst} calculation — counted subjects marked ✓\n` +
+      rows
+        .map((r) => `${r.counted ? "✓" : "–"} ${r.entry.subject}: ${r.entry.level} ${r.entry.grade} = ${r.points} pts`)
+        .join("\n")
+    );
+  }, [entries, activeInst]);
   const english = findSubject(entries, "English");
   const englishStatus = englishBadge(english);
 
@@ -143,11 +153,23 @@ function HomePage() {
                 key={e.id}
                 index={i}
                 entry={e}
+                institution={activeInst}
                 onChange={(p) => update(e.id, p)}
                 onRemove={() => remove(e.id)}
                 canRemove={entries.length > 1}
               />
             ))}
+          </div>
+          <div className="border-t border-white/10 p-3 space-y-2">
+            <button
+              onClick={() => exportSummaryPdf(entries)}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] px-4 py-2.5 text-xs font-bold text-[#0b0f19] hover:scale-[1.01] transition"
+            >
+              <Download className="h-4 w-4" /> Export Summary (PDF)
+            </button>
+            <p className="text-[10px] text-white/40 text-center">
+              Printable report with your grades, Best 5 / Best 6 totals and every qualifying course nationwide.
+            </p>
           </div>
         </section>
 
@@ -155,9 +177,14 @@ function HomePage() {
         <section className="space-y-4 min-w-0">
           <div className="glass rounded-2xl p-4 sm:p-5">
             <div className="grid grid-cols-3 gap-3">
-              <MetricBadge label="Best 6" value={best6} accent="cyan" />
-              <MetricBadge label="Best 5" value={best5} accent="violet" />
-              <MetricBadge label="English" value={englishStatus.label} tone={englishStatus.tone} />
+              <MetricBadge label="Best 6" value={best6} accent="cyan" hint={pointsHint} />
+              <MetricBadge label="Best 5" value={best5} accent="violet" hint={pointsHint} />
+              <MetricBadge
+                label="English"
+                value={englishStatus.label}
+                tone={englishStatus.tone}
+                hint="English is compulsory at nearly every Namibian institution. Green = C or better, amber = D, red = E or lower."
+              />
             </div>
           </div>
 
@@ -204,19 +231,22 @@ function HomePage() {
 function SubjectRow({
   index,
   entry,
+  institution,
   onChange,
   onRemove,
   canRemove,
 }: {
   index: number;
   entry: SubjectEntry;
+  institution: Institution["key"];
   onChange: (p: Partial<SubjectEntry>) => void;
   onRemove: () => void;
   canRemove: boolean;
 }) {
   const grades = entry.level === "NSSCO" ? NSSCO_GRADES : NSSCA_GRADES;
+  const explanation = explainEntry(entry, institution);
   return (
-    <div className="p-3 grid grid-cols-[20px_minmax(0,1.6fr)_minmax(0,1.2fr)_minmax(0,0.8fr)_auto] items-center gap-2">
+    <div className="p-3 grid grid-cols-[20px_minmax(0,1.6fr)_minmax(0,1.2fr)_minmax(0,0.8fr)_auto_auto] items-center gap-2">
       <div className="text-[10px] font-mono text-white/30">{String(index + 1).padStart(2, "0")}</div>
       <select
         value={entry.subject}
@@ -256,6 +286,14 @@ function SubjectRow({
         ))}
       </select>
 
+      <span
+        title={explanation}
+        aria-label={explanation}
+        className="grid h-8 w-8 place-items-center rounded-lg text-white/30 hover:text-[var(--neon-cyan)] cursor-help transition"
+      >
+        <Info className="h-3.5 w-3.5" />
+      </span>
+
       <button
         onClick={onRemove}
         disabled={!canRemove}
@@ -273,11 +311,13 @@ function MetricBadge({
   value,
   accent,
   tone,
+  hint,
 }: {
   label: string;
   value: string | number;
   accent?: "cyan" | "violet";
   tone?: "good" | "warn" | "bad";
+  hint?: string;
 }) {
   const glow =
     accent === "cyan"
@@ -304,8 +344,11 @@ function MetricBadge({
       ? "text-[var(--destructive)]"
       : "text-white";
   return (
-    <div className={`rounded-xl border bg-black/30 px-3 py-2.5 ${glow}`}>
-      <div className="text-[9px] uppercase tracking-[0.15em] text-white/50">{label}</div>
+    <div className={`rounded-xl border bg-black/30 px-3 py-2.5 ${glow}`} title={hint}>
+      <div className="text-[9px] uppercase tracking-[0.15em] text-white/50 flex items-center gap-1">
+        {label}
+        {hint && <Info className="h-2.5 w-2.5 text-white/40" />}
+      </div>
       <div className={`mt-1 text-xl sm:text-2xl font-black font-display tabular-nums ${valueClass}`}>
         {value}
       </div>
