@@ -66,9 +66,16 @@ export function exportSummaryPdf(entries: SubjectEntry[]) {
     totalQualified += qualified.length;
     y += 6;
     line(`${inst.fullName} — ${qualified.length} qualifying programme(s)`, 11, true, [0, 90, 130]);
+    line(
+      `Apply: ${inst.portalName} — ${inst.applyUrl}  ·  Closing date: ${new Date(inst.applicationDeadline).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`,
+      8,
+      false,
+      [90, 90, 120],
+    );
     for (const q of qualified) line(`• ${q}`, 9);
   }
   if (totalQualified === 0) line("No qualifying programmes yet — see the Upgrade Advisor in the app for how to qualify.", 10);
+
 
   y += 16;
   line(`Generated ${new Date().toLocaleString("en-GB")}`, 8, false, [110, 110, 130]);
