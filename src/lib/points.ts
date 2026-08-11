@@ -21,25 +21,80 @@ export interface SubjectEntry {
 }
 
 /** 2026 curriculum: Physical Science is split into Chemistry and Physics. */
-export const SUBJECTS = [
-  "English",
-  "Mathematics",
-  "Biology",
-  "Chemistry",
-  "Physics",
-  "Accounting",
-  "Entrepreneurship",
-  "History",
-  "Geography",
-  "Agriculture",
-  "Computer Studies",
-  "Development Studies",
-  "Economics",
-  "Life Science",
-  "Afrikaans",
-  "Oshindonga",
-  "Otjiherero",
+export const SUBJECT_GROUPS: { group: string; subjects: string[] }[] = [
+  {
+    group: "Core & Sciences",
+    subjects: [
+      "English",
+      "Mathematics",
+      "Additional Mathematics",
+      "Biology",
+      "Chemistry",
+      "Physics",
+      "Life Science",
+      "Agriculture",
+      "Geography",
+    ],
+  },
+  {
+    group: "Commerce & Social Sciences",
+    subjects: [
+      "Accounting",
+      "Business Studies",
+      "Economics",
+      "Entrepreneurship",
+      "Office Administration",
+      "Development Studies",
+      "History",
+      "Religious & Moral Education",
+      "Life Skills",
+      "Sociology",
+    ],
+  },
+  {
+    group: "Technology & ICT",
+    subjects: [
+      "Computer Studies",
+      "Information & Communication Technology (ICT)",
+      "Design & Technology",
+      "Technical Drawing",
+      "Woodwork",
+      "Metalwork",
+      "Engineering Studies",
+    ],
+  },
+  {
+    group: "Home Sciences & Hospitality",
+    subjects: ["Home Economics", "Fashion & Fabrics", "Hospitality", "Food & Nutrition"],
+  },
+  {
+    group: "Arts & Physical Education",
+    subjects: ["Art & Design", "Music", "Physical Education", "Drama & Theatre Arts"],
+  },
+  {
+    group: "Namibian Languages",
+    subjects: [
+      "Afrikaans",
+      "Oshindonga",
+      "Oshikwanyama",
+      "Otjiherero",
+      "Rukwangali",
+      "Silozi",
+      "Setswana",
+      "Khoekhoegowab",
+      "Ju|'hoansi",
+      "Thimbukushu",
+      "Namibian Sign Language",
+    ],
+  },
+  {
+    group: "Foreign Languages",
+    subjects: ["German", "French", "Portuguese", "Spanish", "Chinese (Mandarin)"],
+  },
 ];
+
+export const SUBJECTS = SUBJECT_GROUPS.flatMap((g) => g.subjects);
+
 
 export const NSSCO_GRADES: NSSCOGrade[] = ["A*", "A", "B", "C", "D", "E", "F", "G", "U"];
 export const NSSCA_GRADES: NSSCAGrade[] = ["A", "B", "C", "D", "E", "U"];
