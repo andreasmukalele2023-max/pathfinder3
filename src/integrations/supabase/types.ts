@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      learner_progress: {
+        Row: {
+          created_at: string
+          entries: Json
+          shortlist: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entries?: Json
+          shortlist?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entries?: Json
+          shortlist?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       scraped_courses: {
         Row: {
           best_n: number | null
