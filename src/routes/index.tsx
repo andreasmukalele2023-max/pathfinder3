@@ -113,10 +113,7 @@ function HomePage() {
     });
 
   return (
-    <div
-      className="min-h-[100dvh] w-full overflow-x-hidden sm:pl-[76px]"
-      style={{ paddingBottom: "calc(5.5rem + env(safe-area-inset-bottom))" }}
-    >
+    <div className="min-h-[100dvh] w-full overflow-x-hidden pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:pb-6 sm:pl-[76px]">
       {/* Desktop side dock */}
       <nav className="fixed inset-y-0 left-0 z-40 hidden w-[76px] flex-col items-center gap-1 border-r border-white/10 glass-strong py-4 sm:flex">
         <div className="mb-3 grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-violet)] glow-primary">
