@@ -62,5 +62,5 @@ export function useShortlist() {
     [items, persist],
   );
 
-  return { items, has, toggle, remove };
+  return { items, has, toggle, remove, setAll: persist };
 }
