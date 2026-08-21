@@ -92,6 +92,14 @@ function HomePage() {
   const [activeInst, setActiveInst] = useState<InstitutionKey>("UNAM");
   const [selected, setSelected] = useState<{ course: EvaluatedCourse; inst: Institution } | null>(null);
   const shortlist = useShortlist();
+  const { user, loading: authLoading, signOut } = useAuth();
+  const syncState = useCloudProgress({
+    user,
+    entries,
+    setEntries,
+    shortlist: shortlist.items,
+    setShortlist: shortlist.setAll,
+  });
 
   const inst = INSTITUTIONS.find((i) => i.key === activeInst)!;
 
