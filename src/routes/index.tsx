@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Bookmark,
@@ -12,12 +12,15 @@ import {
   Filter,
   GraduationCap,
   Home,
+  LogIn,
+  LogOut,
   RefreshCw,
   Search,
   Settings,
   SlidersHorizontal,
   Sparkles,
   Trash2,
+  UserRound,
   X,
   Zap,
 } from "lucide-react";
@@ -37,6 +40,8 @@ import { useShortlist } from "@/lib/shortlist";
 import { GradeSheet, ScoreGauges, englishBadge, newRow } from "@/components/grade-sheet";
 import { CourseCard, CourseSheet } from "@/components/course-card";
 import { listScrapedCourses, scrapeInstitution, type ScrapedCourseRow } from "@/lib/scrape.functions";
+import { useAuth } from "@/lib/auth";
+import { useCloudProgress, type SyncState } from "@/lib/sync";
 
 export const Route = createFileRoute("/")({
   head: () => ({
