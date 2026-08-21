@@ -162,26 +162,49 @@ function HomePage() {
 
       {/* Top bar */}
       <header className="sticky top-0 z-30 border-b border-white/10 glass-strong">
-        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-violet)] glow-primary sm:hidden">
-            <Cpu className="h-4.5 w-4.5 text-[#0b0f19]" />
+        <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-violet)] glow-primary sm:hidden">
+              <Cpu className="h-4.5 w-4.5 text-[#0b0f19]" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="truncate text-sm font-bold tracking-tight sm:text-base">
+                <span className="neon-cyan">POINTS</span>
+                <span className="mx-1 opacity-40">/</span>
+                <span className="neon-violet">MATRIX</span>
+              </h1>
+              <p className="truncate text-[10px] uppercase tracking-[0.15em] text-white/45">
+                {NAV.find((n) => n.key === view)?.label} · {PROSPECTUS_YEAR}
+              </p>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-sm font-bold tracking-tight sm:text-base">
-              <span className="neon-cyan">POINTS</span>
-              <span className="mx-1 opacity-40">/</span>
-              <span className="neon-violet">MATRIX</span>
-            </h1>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-white/45">
-              {NAV.find((n) => n.key === view)?.label} · {PROSPECTUS_YEAR} prospectus
-            </p>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <button
+              onClick={() => setSheetOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/10 px-2.5 py-1.5 text-[11px] font-bold text-[var(--neon-cyan)] transition hover:bg-[var(--neon-cyan)]/20 sm:px-3"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              <span className="hidden xs:inline sm:inline">Grades</span>
+            </button>
+            {authLoading ? null : user ? (
+              <button
+                onClick={() => setView("settings")}
+                aria-label="Account"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[var(--success)]/40 bg-[var(--success)]/10 text-[var(--success)]"
+              >
+                <UserRound className="h-4 w-4" />
+              </button>
+            ) : (
+              <Link
+                to="/auth"
+                aria-label="Sign in"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-2.5 py-1.5 text-[11px] font-bold text-white/80 transition hover:bg-white/10"
+              >
+                <LogIn className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Sign in</span>
+              </Link>
+            )}
           </div>
-          <button
-            onClick={() => setSheetOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/10 px-3 py-1.5 text-[11px] font-bold text-[var(--neon-cyan)] transition hover:bg-[var(--neon-cyan)]/20"
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5" /> Grade Sheet
-          </button>
         </div>
       </header>
 
