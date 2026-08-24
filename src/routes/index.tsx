@@ -252,11 +252,21 @@ function HomePage() {
           />
         )}
 
-        {view === "settings" && <SettingsView entries={entries} whatIf={whatIf} onToggleWhatIf={setWhatIf} />}
+        {view === "settings" && (
+          <SettingsView
+            entries={entries}
+            whatIf={whatIf}
+            onToggleWhatIf={setWhatIf}
+            user={user}
+            authLoading={authLoading}
+            syncState={syncState}
+            onSignOut={signOut}
+          />
+        )}
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 glass-strong sm:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 glass-strong pb-[env(safe-area-inset-bottom)] sm:hidden">
         <div className="grid grid-cols-5">
           {NAV.map((n) => (
             <button
