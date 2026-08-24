@@ -252,11 +252,21 @@ function HomePage() {
           />
         )}
 
-        {view === "settings" && <SettingsView entries={entries} whatIf={whatIf} onToggleWhatIf={setWhatIf} />}
+        {view === "settings" && (
+          <SettingsView
+            entries={entries}
+            whatIf={whatIf}
+            onToggleWhatIf={setWhatIf}
+            user={user}
+            authLoading={authLoading}
+            syncState={syncState}
+            onSignOut={signOut}
+          />
+        )}
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 glass-strong sm:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 glass-strong pb-[env(safe-area-inset-bottom)] sm:hidden">
         <div className="grid grid-cols-5">
           {NAV.map((n) => (
             <button
@@ -926,17 +936,71 @@ function SettingsView({
   entries,
   whatIf,
   onToggleWhatIf,
+  user,
+  authLoading,
+  syncState,
+  onSignOut,
 }: {
   entries: SubjectEntry[];
   whatIf: boolean;
   onToggleWhatIf: (v: boolean) => void;
+  user: { email?: string | null } | null;
+  authLoading: boolean;
+  syncState: SyncState;
+  onSignOut: () => void;
 }) {
   const [target, setTarget] = useState(30);
   const best6 = calcTotal(entries, "UNAM", 6);
   const gap = Math.max(0, target - best6);
+  const syncLabel: Record<SyncState, string> = {
+    idle: "Not syncing",
+    loading: "Loading your saved progress…",
+    saving: "Saving…",
+    saved: "All progress saved to your account",
+    error: "Could not sync — check your connection",
+  };
 
   return (
     <div className="space-y-4">
+      <section className="glass rounded-3xl p-4">
+        <h2 className="flex items-center gap-2 text-sm font-bold">
+          <UserRound className="h-4 w-4 text-[var(--neon-cyan)]" /> Account
+        </h2>
+        {authLoading ? (
+          <p className="mt-2 text-[11px] text-white/50">Checking your session…</p>
+        ) : user ? (
+          <div className="mt-3 space-y-3">
+            <p className="break-all text-xs text-white/70">
+              Signed in as <strong className="text-white">{user.email ?? "your account"}</strong>
+            </p>
+            <p
+              className={`text-[11px] ${
+                syncState === "error" ? "text-[var(--destructive)]" : "text-white/50"
+              }`}
+            >
+              {syncLabel[syncState]}
+            </p>
+            <button
+              onClick={onSignOut}
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-white/70 transition hover:bg-white/10"
+            >
+              Sign out
+            </button>
+          </div>
+        ) : (
+          <div className="mt-3 space-y-3">
+            <p className="text-[11px] text-white/55">
+              Sign in to save your grades and shortlist so you never lose progress when you switch devices.
+            </p>
+            <Link
+              to="/auth"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] px-4 py-2.5 text-xs font-bold text-[#0b0f19]"
+            >
+              <LogIn className="h-4 w-4" /> Sign in / Create account
+            </Link>
+          </div>
+        )}
+      </section>
       <section className="glass rounded-3xl p-4">
         <h2 className="flex items-center gap-2 text-sm font-bold">
           <Zap className="h-4 w-4 text-[var(--neon-cyan)]" /> Target Score Simulator
