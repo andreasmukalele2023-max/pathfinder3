@@ -3,15 +3,9 @@ export type NSSCOGrade = "A*" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "U";
 export type NSSCAGrade = "A" | "B" | "C" | "D" | "E" | "U";
 export type Grade = NSSCOGrade | NSSCAGrade;
 
-export type InstitutionKey =
-  | "UNAM"
-  | "NUST"
-  | "IUM"
-  | "Welwitchia"
-  | "TC"
-  | "IOL"
-  | "SBS"
-  | "NIPAM";
+/** Institution identifier. Namibian keys (UNAM, NUST, …) plus SADC keys. */
+export type InstitutionKey = string;
+
 
 export interface SubjectEntry {
   id: string;
