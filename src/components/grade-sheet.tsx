@@ -224,70 +224,74 @@ function SubjectRow({
   const grades = entry.level === "NSSCO" ? NSSCO_GRADES : NSSCA_GRADES;
   const explanation = explainEntry(entry, institution);
   return (
-    <div className="grid grid-cols-[16px_minmax(0,1.5fr)_minmax(0,1fr)_60px_auto_auto] items-center gap-1.5 p-2.5">
-      <div className="font-mono text-[10px] text-white/30">{String(index + 1).padStart(2, "0")}</div>
-      <select
-        value={entry.subject}
-        onChange={(e) => onChange({ subject: e.target.value })}
-        className="w-full min-w-0 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs focus:border-[var(--neon-cyan)]/60 focus:outline-none"
-      >
-        <option value="">Select subject…</option>
-        {SUBJECT_GROUPS.map((g) => (
-          <optgroup key={g.group} label={g.group}>
-            {g.subjects.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </optgroup>
-        ))}
-      </select>
-
-      <div className="inline-flex min-w-0 rounded-lg border border-white/10 bg-white/5 p-0.5 text-[9px] font-bold">
-        {(["NSSCO", "NSSCA"] as Level[]).map((lvl) => (
-          <button
-            key={lvl}
-            onClick={() => onChange({ level: lvl, grade: "" })}
-            className={`flex-1 rounded-md px-1 py-1 transition ${
-              entry.level === lvl
-                ? "bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] text-[#0b0f19]"
-                : "text-white/50"
-            }`}
-          >
-            {lvl}
-          </button>
-        ))}
+    <div className="space-y-1.5 p-2.5">
+      <div className="flex min-w-0 items-center gap-1.5">
+        <span className="w-4 shrink-0 font-mono text-[10px] text-white/30">{String(index + 1).padStart(2, "0")}</span>
+        <select
+          value={entry.subject}
+          onChange={(e) => onChange({ subject: e.target.value })}
+          className="w-full min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs focus:border-[var(--neon-cyan)]/60 focus:outline-none"
+        >
+          <option value="">Select subject…</option>
+          {SUBJECT_GROUPS.map((g) => (
+            <optgroup key={g.group} label={g.group}>
+              {g.subjects.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
       </div>
 
-      <select
-        value={entry.grade}
-        onChange={(e) => onChange({ grade: e.target.value as Grade })}
-        className="w-full min-w-0 rounded-lg border border-white/10 bg-white/5 px-1.5 py-1.5 text-xs focus:border-[var(--neon-violet)]/60 focus:outline-none"
-      >
-        <option value="">—</option>
-        {grades.map((g) => (
-          <option key={g} value={g}>
-            {g}
-          </option>
-        ))}
-      </select>
+      <div className="flex min-w-0 items-center gap-1.5 pl-[22px]">
+        <div className="inline-flex min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 p-0.5 text-[9px] font-bold">
+          {(["NSSCO", "NSSCA"] as Level[]).map((lvl) => (
+            <button
+              key={lvl}
+              onClick={() => onChange({ level: lvl, grade: "" })}
+              className={`min-w-0 flex-1 rounded-md px-1 py-1 transition ${
+                entry.level === lvl
+                  ? "bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] text-[#0b0f19]"
+                  : "text-white/50"
+              }`}
+            >
+              {lvl}
+            </button>
+          ))}
+        </div>
 
-      <span
-        title={explanation}
-        aria-label={explanation}
-        className="grid h-7 w-7 cursor-help place-items-center rounded-lg text-white/30 transition hover:text-[var(--neon-cyan)]"
-      >
-        <Info className="h-3.5 w-3.5" />
-      </span>
+        <select
+          value={entry.grade}
+          onChange={(e) => onChange({ grade: e.target.value as Grade })}
+          className="w-[64px] shrink-0 rounded-lg border border-white/10 bg-white/5 px-1.5 py-1.5 text-xs focus:border-[var(--neon-violet)]/60 focus:outline-none"
+        >
+          <option value="">—</option>
+          {grades.map((g) => (
+            <option key={g} value={g}>
+              {g}
+            </option>
+          ))}
+        </select>
 
-      <button
-        onClick={onRemove}
-        disabled={!canRemove}
-        className="grid h-7 w-7 place-items-center rounded-lg text-white/40 transition hover:bg-destructive/10 hover:text-destructive disabled:opacity-20"
-        aria-label="Remove subject"
-      >
-        <Trash2 className="h-3.5 w-3.5" />
-      </button>
+        <span
+          title={explanation}
+          aria-label={explanation}
+          className="grid h-7 w-7 shrink-0 cursor-help place-items-center rounded-lg text-white/30 transition hover:text-[var(--neon-cyan)]"
+        >
+          <Info className="h-3.5 w-3.5" />
+        </span>
+
+        <button
+          onClick={onRemove}
+          disabled={!canRemove}
+          className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-white/40 transition hover:bg-destructive/10 hover:text-destructive disabled:opacity-20"
+          aria-label="Remove subject"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
     </div>
   );
 }
