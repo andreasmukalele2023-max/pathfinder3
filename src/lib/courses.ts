@@ -25,9 +25,15 @@ export interface Faculty {
 }
 
 export interface Institution {
-  key: "UNAM" | "NUST" | "IUM" | "Welwitchia" | "TC" | "IOL" | "SBS" | "NIPAM";
+  key: string;
   name: string;
   fullName: string;
+  /** Country the institution is based in. */
+  country: string;
+  /** "Namibia" for local institutions, "SADC" for accredited regional ones. */
+  region: "Namibia" | "SADC";
+  /** Brand colour used for pills and badges. */
+  accent?: string;
   officialSite: string;
   applyUrl: string;
   portalName: string;
@@ -36,9 +42,12 @@ export interface Institution {
   faculties: Faculty[];
 }
 
-export const INSTITUTIONS: Institution[] = [
+export const NAMIBIAN_INSTITUTIONS: Institution[] = [
   {
     key: "UNAM",
+    country: "Namibia",
+    region: "Namibia",
+    accent: "#00f3ff",
     name: "UNAM",
     fullName: "University of Namibia",
     officialSite: "https://www.unam.edu.na",
@@ -107,6 +116,9 @@ export const INSTITUTIONS: Institution[] = [
   },
   {
     key: "NUST",
+    country: "Namibia",
+    region: "Namibia",
+    accent: "#8a2be2",
     name: "NUST",
     fullName: "Namibia University of Science and Technology",
     officialSite: "https://www.nust.na",
@@ -167,6 +179,9 @@ export const INSTITUTIONS: Institution[] = [
   },
   {
     key: "IUM",
+    country: "Namibia",
+    region: "Namibia",
+    accent: "#ff8a3d",
     name: "IUM",
     fullName: "International University of Management",
     officialSite: "https://www.ium.edu.na",
@@ -211,6 +226,9 @@ export const INSTITUTIONS: Institution[] = [
   },
   {
     key: "Welwitchia",
+    country: "Namibia",
+    region: "Namibia",
+    accent: "#3dffa5",
     name: "Welwitchia",
     fullName: "Welwitchia Health Sciences University",
     officialSite: "https://welwitchiauniversity.edu.na",
@@ -232,6 +250,9 @@ export const INSTITUTIONS: Institution[] = [
   },
   {
     key: "TC",
+    country: "Namibia",
+    region: "Namibia",
+    accent: "#ff5da2",
     name: "TC",
     fullName: "Triumphant College",
     officialSite: "https://www.triumphantcollege.com",
@@ -253,6 +274,9 @@ export const INSTITUTIONS: Institution[] = [
   },
   {
     key: "IOL",
+    country: "Namibia",
+    region: "Namibia",
+    accent: "#ffd93d",
     name: "IOL",
     fullName: "Institute of Open Learning",
     officialSite: "https://iol.edu.na",
@@ -274,6 +298,9 @@ export const INSTITUTIONS: Institution[] = [
   },
   {
     key: "SBS",
+    country: "Namibia",
+    region: "Namibia",
+    accent: "#7c9cff",
     name: "SBS",
     fullName: "Southern Business School (STADIO)",
     officialSite: "https://www.sbsnamibia.com",
@@ -295,6 +322,9 @@ export const INSTITUTIONS: Institution[] = [
   },
   {
     key: "NIPAM",
+    country: "Namibia",
+    region: "Namibia",
+    accent: "#5ee0c8",
     name: "NIPAM",
     fullName: "Namibia Institute of Public Administration and Management",
     officialSite: "https://nipam.na",
@@ -314,3 +344,14 @@ export const INSTITUTIONS: Institution[] = [
     ],
   },
 ];
+
+import { SADC_INSTITUTIONS } from "./sadc";
+
+/** Namibian institutions first, then accredited SADC universities. */
+export const INSTITUTIONS: Institution[] = [...NAMIBIAN_INSTITUTIONS, ...SADC_INSTITUTIONS];
+
+export const COUNTRIES = Array.from(new Set(INSTITUTIONS.map((i) => i.country)));
+
+export function accentFor(inst: Institution): string {
+  return inst.accent ?? "#00f3ff";
+}
