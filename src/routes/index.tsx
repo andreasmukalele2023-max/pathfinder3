@@ -487,7 +487,7 @@ function CoursesView({
           if (!cancelled) { setScraped([]); setLoading(false); }
           return;
         }
-        const rows = await listFn({ data: { institutionKey: inst.key } });
+        const rows = await listFn({ data: { institutionKey: inst.key as never } });
         if (!cancelled) setScraped(rows);
       } catch {
         if (!cancelled) setScraped([]);
@@ -503,7 +503,7 @@ function CoursesView({
   const sync = async () => {
     try {
       setSyncing(true);
-      const res = await scrapeFn({ data: { institutionKey: inst.key } });
+      const res = await scrapeFn({ data: { institutionKey: inst.key as never } });
       setScraped(res.courses ?? []);
     } catch {
       /* keep accredited directory */
