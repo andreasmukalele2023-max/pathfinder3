@@ -103,6 +103,28 @@ function HomePage() {
 
   const inst = INSTITUTIONS.find((i) => i.key === activeInst)!;
 
+  const gradedCount = entries.filter((e) => e.subject && e.grade && e.grade !== "U").length;
+  const onboarding = !authLoading && (!user || gradedCount < 5);
+
+  if (authLoading) {
+    return (
+      <div className="grid min-h-[100dvh] place-items-center text-sm text-white/50">Loading…</div>
+    );
+  }
+
+  if (onboarding) {
+    return (
+      <Onboarding
+        user={user}
+        gradedCount={gradedCount}
+        entries={entries}
+        setEntries={setEntries}
+        sheetOpen={sheetOpen}
+        setSheetOpen={setSheetOpen}
+      />
+    );
+  }
+
   const toggleSave = (c: EvaluatedCourse, i: Institution) =>
     shortlist.toggle({
       instKey: i.key,
@@ -1079,6 +1101,108 @@ function SettingsView({
         </p>
         <p className="mt-2">Install this app from your browser menu (“Add to Home screen”) to use it offline-style, full screen.</p>
       </section>
+    </div>
+  );
+}
+
+/* ------------------------------ Onboarding -------------------------------- */
+
+function Onboarding({
+  user,
+  gradedCount,
+  entries,
+  setEntries,
+  sheetOpen,
+  setSheetOpen,
+}: {
+  user: { email?: string | null } | null;
+  gradedCount: number;
+  entries: SubjectEntry[];
+  setEntries: React.Dispatch<React.SetStateAction<SubjectEntry[]>>;
+  sheetOpen: boolean;
+  setSheetOpen: (v: boolean) => void;
+}) {
+  const steps = [
+    {
+      done: !!user,
+      title: "Sign in to save your progress",
+      body: "Your grades and shortlist are stored on your account, so nothing is lost when you close the app or switch phones.",
+    },
+    {
+      done: gradedCount >= 5,
+      title: "Enter at least 5 subject grades",
+      body: `You have captured ${gradedCount} of 5 required subjects. Add your NSSCO or NSSCAS symbols to unlock the calculator.`,
+    },
+  ];
+
+  return (
+    <div className="min-h-[100dvh] w-full overflow-x-hidden px-4 py-10">
+      <div className="mx-auto max-w-md space-y-5 animate-fade-in">
+        <div className="text-center">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-violet)] glow-primary">
+            <Cpu className="h-7 w-7 text-[#0b0f19]" />
+          </div>
+          <h1 className="mt-4 font-display text-2xl font-black tracking-tight">
+            <span className="neon-cyan">POINTS</span>
+            <span className="mx-1 opacity-40">/</span>
+            <span className="neon-violet">MATRIX</span>
+          </h1>
+          <p className="mt-2 text-xs text-white/50">
+            Two quick steps before you start — {PROSPECTUS_YEAR} admission points for Namibia and the SADC region.
+          </p>
+        </div>
+
+        {steps.map((st, idx) => (
+          <section
+            key={st.title}
+            className={`glass rounded-3xl p-4 ${st.done ? "border-[var(--success)]/40" : ""}`}
+          >
+            <div className="flex items-start gap-3">
+              <span
+                className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-black ${
+                  st.done
+                    ? "bg-[var(--success)]/20 text-[var(--success)]"
+                    : "bg-white/10 text-white/60"
+                }`}
+              >
+                {st.done ? "✓" : idx + 1}
+              </span>
+              <div className="min-w-0">
+                <h2 className="text-sm font-bold">{st.title}</h2>
+                <p className="mt-1 text-[11px] text-white/55">{st.body}</p>
+              </div>
+            </div>
+            {idx === 0 && !st.done && (
+              <Link
+                to="/auth"
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] px-4 py-2.5 text-xs font-bold text-[#0b0f19]"
+              >
+                <LogIn className="h-4 w-4" /> Sign in / Create account
+              </Link>
+            )}
+            {idx === 1 && !st.done && (
+              <button
+                disabled={!user}
+                onClick={() => setSheetOpen(true)}
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/10 px-4 py-2.5 text-xs font-bold text-[var(--neon-cyan)] disabled:opacity-40"
+              >
+                <SlidersHorizontal className="h-4 w-4" /> Open Grade Sheet
+              </button>
+            )}
+          </section>
+        ))}
+      </div>
+
+      <GradeSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        entries={entries}
+        setEntries={setEntries}
+        institution="UNAM"
+        whatIf={false}
+        onToggleWhatIf={() => {}}
+        onExport={() => exportSummaryPdf(entries)}
+      />
     </div>
   );
 }
