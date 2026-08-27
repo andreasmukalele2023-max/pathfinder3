@@ -325,9 +325,10 @@ function DashboardView({
   onGoCourses: (k: InstitutionKey) => void;
   onGo: (v: View) => void;
 }) {
+  const [region, setRegion] = useState<"Namibia" | "SADC">("Namibia");
   const stats = useMemo(
     () =>
-      INSTITUTIONS.map((inst) => {
+      INSTITUTIONS.filter((i) => i.region === region).map((inst) => {
         let eligible = 0;
         let total = 0;
         for (const f of inst.faculties) {
@@ -338,7 +339,7 @@ function DashboardView({
         }
         return { inst, eligible, total };
       }),
-    [entries],
+    [entries, region],
   );
 
   const totalEligible = stats.reduce((a, s) => a + s.eligible, 0);
@@ -375,7 +376,22 @@ function DashboardView({
       </section>
 
       <section className="space-y-2">
-        <h2 className="px-1 text-xs font-bold uppercase tracking-widest text-white/50">Institutions</h2>
+        <div className="flex items-center justify-between gap-2 px-1">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-white/50">Institutions</h2>
+          <div className="flex gap-1 rounded-full border border-white/10 bg-white/5 p-0.5">
+            {(["Namibia", "SADC"] as const).map((r) => (
+              <button
+                key={r}
+                onClick={() => setRegion(r)}
+                className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition ${
+                  region === r ? "bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)]" : "text-white/50"
+                }`}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="grid gap-2 sm:grid-cols-2">
           {stats.map(({ inst, eligible, total }) => {
             const d = deadlineInfo(inst);
@@ -1043,6 +1059,23 @@ function SettingsView({
           Points Matrix evaluates NSSCO and NSSCAS results against published {PROSPECTUS_YEAR} prospectus admission
           criteria for accredited Namibian institutions. It is an indicative guide — final admission decisions rest
           with each institution.
+        </p>
+        <p className="mt-3 rounded-xl border border-white/10 bg-black/30 p-3 text-white/70">
+          Created by <strong className="text-white">Andreas Mukalele</strong>, a Grade 12 learner. For more info
+          contact him on{" "}
+          <a href="tel:0858141236" className="font-semibold text-[var(--neon-cyan)]">
+            085 814 1236
+          </a>{" "}
+          or on Instagram{" "}
+          <a
+            href="https://instagram.com/legal_criminal90067"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-[var(--neon-violet)]"
+          >
+            @legal_criminal90067
+          </a>
+          .
         </p>
         <p className="mt-2">Install this app from your browser menu (“Add to Home screen”) to use it offline-style, full screen.</p>
       </section>
