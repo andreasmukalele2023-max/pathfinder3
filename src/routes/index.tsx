@@ -31,7 +31,7 @@ import {
   type NSSCOGrade,
   type SubjectEntry,
 } from "@/lib/points";
-import { INSTITUTIONS, type Course, type Faculty, type Institution } from "@/lib/courses";
+import { INSTITUTIONS, accentFor, type Course, type Faculty, type Institution } from "@/lib/courses";
 import { courseLevel, evaluateCourse, matchesQuery, type EvaluatedCourse } from "@/lib/evaluate";
 import { CAREERS, careerMatchesCourse, findCareer } from "@/lib/careers";
 import { deadlineInfo, isNsfafEligible, PROSPECTUS_YEAR } from "@/lib/admissions";
@@ -150,7 +150,7 @@ function HomePage() {
               }`}
               style={
                 activeInst === i.key && view === "courses"
-                  ? { background: `var(--color-${i.key.toLowerCase()})` }
+                  ? { background: accentFor(i) }
                   : undefined
               }
             >
@@ -387,7 +387,7 @@ function DashboardView({
               >
                 <span
                   className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[10px] font-black text-[#0b0f19]"
-                  style={{ background: `var(--color-${inst.key.toLowerCase()})` }}
+                  style={{ background: accentFor(inst) }}
                 >
                   {inst.name.slice(0, 4)}
                 </span>
@@ -443,6 +443,10 @@ function CoursesView({
     setScraped(null);
     (async () => {
       try {
+        if (inst.region !== "Namibia") {
+          if (!cancelled) { setScraped([]); setLoading(false); }
+          return;
+        }
         const rows = await listFn({ data: { institutionKey: inst.key } });
         if (!cancelled) setScraped(rows);
       } catch {
@@ -454,7 +458,7 @@ function CoursesView({
     return () => {
       cancelled = true;
     };
-  }, [inst.key, listFn]);
+  }, [inst.key, inst.region, listFn]);
 
   const sync = async () => {
     try {
@@ -511,7 +515,7 @@ function CoursesView({
               className={`shrink-0 rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition ${
                 active ? "text-[#0b0f19]" : "border border-white/10 bg-white/5 text-white/60 hover:text-white"
               }`}
-              style={active ? { background: `var(--color-${i.key.toLowerCase()})` } : undefined}
+              style={active ? { background: accentFor(i) } : undefined}
             >
               {i.name}
             </button>
@@ -529,6 +533,7 @@ function CoursesView({
               {eligibleCount} of {evaluated.length} programmes open to you · Best {inst.key === "UNAM" ? "5/6" : "6"} rules
             </p>
           </div>
+          {inst.region === "Namibia" && (
           <button
             onClick={sync}
             disabled={syncing}
@@ -538,6 +543,7 @@ function CoursesView({
             <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
             {syncing ? "Syncing" : "Sync"}
           </button>
+          )}
         </div>
 
         <div className="mt-3 flex gap-2">
