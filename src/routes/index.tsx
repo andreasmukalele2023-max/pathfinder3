@@ -425,6 +425,8 @@ function CoursesView({
   onToggleSave: (c: EvaluatedCourse) => void;
 }) {
   const [query, setQuery] = useState("");
+  const [region, setRegion] = useState<"Namibia" | "SADC">(inst.region);
+  const [country, setCountry] = useState<string>("All");
   const [levels, setLevels] = useState<string[]>([]);
   const [faculty, setFaculty] = useState("All");
   const [onlyEligible, setOnlyEligible] = useState(false);
@@ -1044,6 +1046,91 @@ function SettingsView({
         </p>
         <p className="mt-2">Install this app from your browser menu (“Add to Home screen”) to use it offline-style, full screen.</p>
       </section>
+    </div>
+  );
+}
+
+/* --------------------------- Region switcher ------------------------------ */
+
+function RegionSwitcher({
+  region,
+  setRegion,
+  country,
+  setCountry,
+  activeKey,
+  onSelectInst,
+}: {
+  region: "Namibia" | "SADC";
+  setRegion: (r: "Namibia" | "SADC") => void;
+  country: string;
+  setCountry: (c: string) => void;
+  activeKey: InstitutionKey;
+  onSelectInst: (k: InstitutionKey) => void;
+}) {
+  const inRegion = INSTITUTIONS.filter((i) => i.region === region);
+  const countries = Array.from(new Set(inRegion.map((i) => i.country)));
+  const visible = country === "All" ? inRegion : inRegion.filter((i) => i.country === country);
+
+  const switchRegion = (r: "Namibia" | "SADC") => {
+    setRegion(r);
+    setCountry("All");
+    const first = INSTITUTIONS.find((i) => i.region === r);
+    if (first) onSelectInst(first.key);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-1.5 rounded-2xl border border-white/10 bg-white/5 p-1">
+        {(["Namibia", "SADC"] as const).map((r) => (
+          <button
+            key={r}
+            onClick={() => switchRegion(r)}
+            className={`rounded-xl px-3 py-2 text-[11px] font-bold uppercase tracking-wider transition ${
+              region === r
+                ? "bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] text-[#0b0f19]"
+                : "text-white/60 hover:text-white"
+            }`}
+          >
+            {r === "Namibia" ? "Namibian institutions" : "SADC region"}
+          </button>
+        ))}
+      </div>
+
+      {region === "SADC" && countries.length > 1 && (
+        <div className="-mx-4 flex gap-1.5 overflow-x-auto scrollbar-none px-4">
+          {["All", ...countries].map((c) => (
+            <button
+              key={c}
+              onClick={() => setCountry(c)}
+              className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
+                country === c
+                  ? "border-[var(--neon-violet)] bg-[var(--neon-violet)]/20 text-[var(--neon-violet)]"
+                  : "border-white/10 bg-white/5 text-white/60"
+              }`}
+            >
+              {c === "All" ? "All countries" : c}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="-mx-4 flex gap-1.5 overflow-x-auto scrollbar-none px-4 pb-1">
+        {visible.map((i) => {
+          const active = i.key === activeKey;
+          return (
+            <button
+              key={i.key}
+              onClick={() => onSelectInst(i.key)}
+              className={`shrink-0 rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition ${
+                active ? "text-[#0b0f19]" : "border border-white/10 bg-white/5 text-white/60 hover:text-white"
+              }`}
+              style={active ? { background: accentFor(i) } : undefined}
+            >
+              {i.name}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
