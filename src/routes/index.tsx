@@ -504,24 +504,15 @@ function CoursesView({
 
   return (
     <div className="space-y-4">
-      {/* Institution carousel */}
-      <div className="-mx-4 flex gap-1.5 overflow-x-auto scrollbar-none px-4 pb-1">
-        {INSTITUTIONS.map((i) => {
-          const active = i.key === inst.key;
-          return (
-            <button
-              key={i.key}
-              onClick={() => onSelectInst(i.key)}
-              className={`shrink-0 rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition ${
-                active ? "text-[#0b0f19]" : "border border-white/10 bg-white/5 text-white/60 hover:text-white"
-              }`}
-              style={active ? { background: accentFor(i) } : undefined}
-            >
-              {i.name}
-            </button>
-          );
-        })}
-      </div>
+      <RegionSwitcher
+        region={region}
+        setRegion={setRegion}
+        country={country}
+        setCountry={setCountry}
+        activeKey={inst.key}
+        onSelectInst={onSelectInst}
+      />
+
 
       <section className="glass rounded-3xl p-4">
         <div className="flex items-start justify-between gap-3">
