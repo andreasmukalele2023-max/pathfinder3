@@ -1,4 +1,5 @@
 import type { NSSCOGrade } from "./points";
+import { SADC_INSTITUTIONS } from "./sadc";
 
 export interface CourseRequirement {
   subject: string;
@@ -345,7 +346,6 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
   },
 ];
 
-import { SADC_INSTITUTIONS } from "./sadc";
 
 /** Namibian institutions first, then accredited SADC universities. */
 export const INSTITUTIONS: Institution[] = [...NAMIBIAN_INSTITUTIONS, ...SADC_INSTITUTIONS];
