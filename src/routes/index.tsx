@@ -31,7 +31,7 @@ import {
   type NSSCOGrade,
   type SubjectEntry,
 } from "@/lib/points";
-import { INSTITUTIONS, type Course, type Faculty, type Institution } from "@/lib/courses";
+import { INSTITUTIONS, accentFor, type Course, type Faculty, type Institution } from "@/lib/courses";
 import { courseLevel, evaluateCourse, matchesQuery, type EvaluatedCourse } from "@/lib/evaluate";
 import { CAREERS, careerMatchesCourse, findCareer } from "@/lib/careers";
 import { deadlineInfo, isNsfafEligible, PROSPECTUS_YEAR } from "@/lib/admissions";
@@ -103,6 +103,28 @@ function HomePage() {
 
   const inst = INSTITUTIONS.find((i) => i.key === activeInst)!;
 
+  const gradedCount = entries.filter((e) => e.subject && e.grade && e.grade !== "U").length;
+  const onboarding = !authLoading && (!user || gradedCount < 5);
+
+  if (authLoading) {
+    return (
+      <div className="grid min-h-[100dvh] place-items-center text-sm text-white/50">Loading…</div>
+    );
+  }
+
+  if (onboarding) {
+    return (
+      <Onboarding
+        user={user}
+        gradedCount={gradedCount}
+        entries={entries}
+        setEntries={setEntries}
+        sheetOpen={sheetOpen}
+        setSheetOpen={setSheetOpen}
+      />
+    );
+  }
+
   const toggleSave = (c: EvaluatedCourse, i: Institution) =>
     shortlist.toggle({
       instKey: i.key,
@@ -150,7 +172,7 @@ function HomePage() {
               }`}
               style={
                 activeInst === i.key && view === "courses"
-                  ? { background: `var(--color-${i.key.toLowerCase()})` }
+                  ? { background: accentFor(i) }
                   : undefined
               }
             >
@@ -325,9 +347,10 @@ function DashboardView({
   onGoCourses: (k: InstitutionKey) => void;
   onGo: (v: View) => void;
 }) {
+  const [region, setRegion] = useState<"Namibia" | "SADC">("Namibia");
   const stats = useMemo(
     () =>
-      INSTITUTIONS.map((inst) => {
+      INSTITUTIONS.filter((i) => i.region === region).map((inst) => {
         let eligible = 0;
         let total = 0;
         for (const f of inst.faculties) {
@@ -338,7 +361,7 @@ function DashboardView({
         }
         return { inst, eligible, total };
       }),
-    [entries],
+    [entries, region],
   );
 
   const totalEligible = stats.reduce((a, s) => a + s.eligible, 0);
@@ -375,7 +398,22 @@ function DashboardView({
       </section>
 
       <section className="space-y-2">
-        <h2 className="px-1 text-xs font-bold uppercase tracking-widest text-white/50">Institutions</h2>
+        <div className="flex items-center justify-between gap-2 px-1">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-white/50">Institutions</h2>
+          <div className="flex gap-1 rounded-full border border-white/10 bg-white/5 p-0.5">
+            {(["Namibia", "SADC"] as const).map((r) => (
+              <button
+                key={r}
+                onClick={() => setRegion(r)}
+                className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition ${
+                  region === r ? "bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)]" : "text-white/50"
+                }`}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="grid gap-2 sm:grid-cols-2">
           {stats.map(({ inst, eligible, total }) => {
             const d = deadlineInfo(inst);
@@ -387,7 +425,7 @@ function DashboardView({
               >
                 <span
                   className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[10px] font-black text-[#0b0f19]"
-                  style={{ background: `var(--color-${inst.key.toLowerCase()})` }}
+                  style={{ background: accentFor(inst) }}
                 >
                   {inst.name.slice(0, 4)}
                 </span>
@@ -425,6 +463,8 @@ function CoursesView({
   onToggleSave: (c: EvaluatedCourse) => void;
 }) {
   const [query, setQuery] = useState("");
+  const [region, setRegion] = useState<"Namibia" | "SADC">(inst.region);
+  const [country, setCountry] = useState<string>("All");
   const [levels, setLevels] = useState<string[]>([]);
   const [faculty, setFaculty] = useState("All");
   const [onlyEligible, setOnlyEligible] = useState(false);
@@ -443,7 +483,11 @@ function CoursesView({
     setScraped(null);
     (async () => {
       try {
-        const rows = await listFn({ data: { institutionKey: inst.key } });
+        if (inst.region !== "Namibia") {
+          if (!cancelled) { setScraped([]); setLoading(false); }
+          return;
+        }
+        const rows = await listFn({ data: { institutionKey: inst.key as never } });
         if (!cancelled) setScraped(rows);
       } catch {
         if (!cancelled) setScraped([]);
@@ -454,12 +498,12 @@ function CoursesView({
     return () => {
       cancelled = true;
     };
-  }, [inst.key, listFn]);
+  }, [inst.key, inst.region, listFn]);
 
   const sync = async () => {
     try {
       setSyncing(true);
-      const res = await scrapeFn({ data: { institutionKey: inst.key } });
+      const res = await scrapeFn({ data: { institutionKey: inst.key as never } });
       setScraped(res.courses ?? []);
     } catch {
       /* keep accredited directory */
@@ -500,24 +544,15 @@ function CoursesView({
 
   return (
     <div className="space-y-4">
-      {/* Institution carousel */}
-      <div className="-mx-4 flex gap-1.5 overflow-x-auto scrollbar-none px-4 pb-1">
-        {INSTITUTIONS.map((i) => {
-          const active = i.key === inst.key;
-          return (
-            <button
-              key={i.key}
-              onClick={() => onSelectInst(i.key)}
-              className={`shrink-0 rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition ${
-                active ? "text-[#0b0f19]" : "border border-white/10 bg-white/5 text-white/60 hover:text-white"
-              }`}
-              style={active ? { background: `var(--color-${i.key.toLowerCase()})` } : undefined}
-            >
-              {i.name}
-            </button>
-          );
-        })}
-      </div>
+      <RegionSwitcher
+        region={region}
+        setRegion={setRegion}
+        country={country}
+        setCountry={setCountry}
+        activeKey={inst.key}
+        onSelectInst={onSelectInst}
+      />
+
 
       <section className="glass rounded-3xl p-4">
         <div className="flex items-start justify-between gap-3">
@@ -529,6 +564,7 @@ function CoursesView({
               {eligibleCount} of {evaluated.length} programmes open to you · Best {inst.key === "UNAM" ? "5/6" : "6"} rules
             </p>
           </div>
+          {inst.region === "Namibia" && (
           <button
             onClick={sync}
             disabled={syncing}
@@ -538,6 +574,7 @@ function CoursesView({
             <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
             {syncing ? "Syncing" : "Sync"}
           </button>
+          )}
         </div>
 
         <div className="mt-3 flex gap-2">
@@ -1045,8 +1082,212 @@ function SettingsView({
           criteria for accredited Namibian institutions. It is an indicative guide — final admission decisions rest
           with each institution.
         </p>
+        <p className="mt-3 rounded-xl border border-white/10 bg-black/30 p-3 text-white/70">
+          Created by <strong className="text-white">Andreas Mukalele</strong>, a Grade 12 learner. For more info
+          contact him on{" "}
+          <a href="tel:0858141236" className="font-semibold text-[var(--neon-cyan)]">
+            085 814 1236
+          </a>{" "}
+          or on Instagram{" "}
+          <a
+            href="https://instagram.com/legal_criminal90067"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-[var(--neon-violet)]"
+          >
+            @legal_criminal90067
+          </a>
+          .
+        </p>
         <p className="mt-2">Install this app from your browser menu (“Add to Home screen”) to use it offline-style, full screen.</p>
       </section>
+    </div>
+  );
+}
+
+/* ------------------------------ Onboarding -------------------------------- */
+
+function Onboarding({
+  user,
+  gradedCount,
+  entries,
+  setEntries,
+  sheetOpen,
+  setSheetOpen,
+}: {
+  user: { email?: string | null } | null;
+  gradedCount: number;
+  entries: SubjectEntry[];
+  setEntries: React.Dispatch<React.SetStateAction<SubjectEntry[]>>;
+  sheetOpen: boolean;
+  setSheetOpen: (v: boolean) => void;
+}) {
+  const steps = [
+    {
+      done: !!user,
+      title: "Sign in to save your progress",
+      body: "Your grades and shortlist are stored on your account, so nothing is lost when you close the app or switch phones.",
+    },
+    {
+      done: gradedCount >= 5,
+      title: "Enter at least 5 subject grades",
+      body: `You have captured ${gradedCount} of 5 required subjects. Add your NSSCO or NSSCAS symbols to unlock the calculator.`,
+    },
+  ];
+
+  return (
+    <div className="min-h-[100dvh] w-full overflow-x-hidden px-4 py-10">
+      <div className="mx-auto max-w-md space-y-5 animate-fade-in">
+        <div className="text-center">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-violet)] glow-primary">
+            <Cpu className="h-7 w-7 text-[#0b0f19]" />
+          </div>
+          <h1 className="mt-4 font-display text-2xl font-black tracking-tight">
+            <span className="neon-cyan">POINTS</span>
+            <span className="mx-1 opacity-40">/</span>
+            <span className="neon-violet">MATRIX</span>
+          </h1>
+          <p className="mt-2 text-xs text-white/50">
+            Two quick steps before you start — {PROSPECTUS_YEAR} admission points for Namibia and the SADC region.
+          </p>
+        </div>
+
+        {steps.map((st, idx) => (
+          <section
+            key={st.title}
+            className={`glass rounded-3xl p-4 ${st.done ? "border-[var(--success)]/40" : ""}`}
+          >
+            <div className="flex items-start gap-3">
+              <span
+                className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-black ${
+                  st.done
+                    ? "bg-[var(--success)]/20 text-[var(--success)]"
+                    : "bg-white/10 text-white/60"
+                }`}
+              >
+                {st.done ? "✓" : idx + 1}
+              </span>
+              <div className="min-w-0">
+                <h2 className="text-sm font-bold">{st.title}</h2>
+                <p className="mt-1 text-[11px] text-white/55">{st.body}</p>
+              </div>
+            </div>
+            {idx === 0 && !st.done && (
+              <Link
+                to="/auth"
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] px-4 py-2.5 text-xs font-bold text-[#0b0f19]"
+              >
+                <LogIn className="h-4 w-4" /> Sign in / Create account
+              </Link>
+            )}
+            {idx === 1 && !st.done && (
+              <button
+                disabled={!user}
+                onClick={() => setSheetOpen(true)}
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/10 px-4 py-2.5 text-xs font-bold text-[var(--neon-cyan)] disabled:opacity-40"
+              >
+                <SlidersHorizontal className="h-4 w-4" /> Open Grade Sheet
+              </button>
+            )}
+          </section>
+        ))}
+      </div>
+
+      <GradeSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        entries={entries}
+        setEntries={setEntries}
+        institution="UNAM"
+        whatIf={false}
+        onToggleWhatIf={() => {}}
+        onExport={() => exportSummaryPdf(entries)}
+      />
+    </div>
+  );
+}
+
+/* --------------------------- Region switcher ------------------------------ */
+
+function RegionSwitcher({
+  region,
+  setRegion,
+  country,
+  setCountry,
+  activeKey,
+  onSelectInst,
+}: {
+  region: "Namibia" | "SADC";
+  setRegion: (r: "Namibia" | "SADC") => void;
+  country: string;
+  setCountry: (c: string) => void;
+  activeKey: InstitutionKey;
+  onSelectInst: (k: InstitutionKey) => void;
+}) {
+  const inRegion = INSTITUTIONS.filter((i) => i.region === region);
+  const countries = Array.from(new Set(inRegion.map((i) => i.country)));
+  const visible = country === "All" ? inRegion : inRegion.filter((i) => i.country === country);
+
+  const switchRegion = (r: "Namibia" | "SADC") => {
+    setRegion(r);
+    setCountry("All");
+    const first = INSTITUTIONS.find((i) => i.region === r);
+    if (first) onSelectInst(first.key);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-1.5 rounded-2xl border border-white/10 bg-white/5 p-1">
+        {(["Namibia", "SADC"] as const).map((r) => (
+          <button
+            key={r}
+            onClick={() => switchRegion(r)}
+            className={`rounded-xl px-3 py-2 text-[11px] font-bold uppercase tracking-wider transition ${
+              region === r
+                ? "bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] text-[#0b0f19]"
+                : "text-white/60 hover:text-white"
+            }`}
+          >
+            {r === "Namibia" ? "Namibian institutions" : "SADC region"}
+          </button>
+        ))}
+      </div>
+
+      {region === "SADC" && countries.length > 1 && (
+        <div className="-mx-4 flex gap-1.5 overflow-x-auto scrollbar-none px-4">
+          {["All", ...countries].map((c) => (
+            <button
+              key={c}
+              onClick={() => setCountry(c)}
+              className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
+                country === c
+                  ? "border-[var(--neon-violet)] bg-[var(--neon-violet)]/20 text-[var(--neon-violet)]"
+                  : "border-white/10 bg-white/5 text-white/60"
+              }`}
+            >
+              {c === "All" ? "All countries" : c}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="-mx-4 flex gap-1.5 overflow-x-auto scrollbar-none px-4 pb-1">
+        {visible.map((i) => {
+          const active = i.key === activeKey;
+          return (
+            <button
+              key={i.key}
+              onClick={() => onSelectInst(i.key)}
+              className={`shrink-0 rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition ${
+                active ? "text-[#0b0f19]" : "border border-white/10 bg-white/5 text-white/60 hover:text-white"
+              }`}
+              style={active ? { background: accentFor(i) } : undefined}
+            >
+              {i.name}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
