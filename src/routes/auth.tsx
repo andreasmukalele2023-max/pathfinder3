@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { ArrowLeft, Cpu, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -66,14 +67,17 @@ function AuthPage() {
   const google = async () => {
     setBusy(true);
     setMsg(null);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/` },
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+      extraParams: { prompt: "select_account" },
     });
-    if (error) {
-      setMsg({ tone: "err", text: error.message });
+    if (result.error) {
+      setMsg({ tone: "err", text: result.error.message });
       setBusy(false);
+      return;
     }
+    if (result.redirected) return;
+    navigate({ to: "/" });
   };
 
   return (
