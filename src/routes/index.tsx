@@ -1226,7 +1226,6 @@ function RegionSwitcher({
 }) {
   const inRegion = INSTITUTIONS.filter((i) => i.region === region);
   const countries = Array.from(new Set(inRegion.map((i) => i.country)));
-  const visible = country === "All" ? inRegion : inRegion.filter((i) => i.country === country);
 
   const switchRegion = (r: "Namibia" | "SADC") => {
     setRegion(r);
