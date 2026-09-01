@@ -1226,7 +1226,6 @@ function RegionSwitcher({
 }) {
   const inRegion = INSTITUTIONS.filter((i) => i.region === region);
   const countries = Array.from(new Set(inRegion.map((i) => i.country)));
-  const visible = country === "All" ? inRegion : inRegion.filter((i) => i.country === country);
 
   const switchRegion = (r: "Namibia" | "SADC") => {
     setRegion(r);
@@ -1253,38 +1252,57 @@ function RegionSwitcher({
         ))}
       </div>
 
-      {region === "SADC" && countries.length > 1 && (
+      {/* Country buttons */}
+      {countries.length > 1 && (
         <div className="-mx-4 flex gap-1.5 overflow-x-auto scrollbar-none px-4">
-          {["All", ...countries].map((c) => (
+          {countries.map((c) => (
             <button
               key={c}
-              onClick={() => setCountry(c)}
-              className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
+              onClick={() => {
+                setCountry(country === c ? "All" : c);
+                const first = inRegion.find((i) => i.country === c);
+                if (first && country !== c) onSelectInst(first.key);
+              }}
+              className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-bold transition ${
                 country === c
-                  ? "border-[var(--neon-violet)] bg-[var(--neon-violet)]/20 text-[var(--neon-violet)]"
-                  : "border-white/10 bg-white/5 text-white/60"
+                  ? "border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)]"
+                  : "border-white/10 bg-white/5 text-white/60 hover:text-white"
               }`}
             >
-              {c === "All" ? "All countries" : c}
+              {c}
             </button>
           ))}
         </div>
       )}
 
-      <div className="-mx-4 flex gap-1.5 overflow-x-auto scrollbar-none px-4 pb-1">
-        {visible.map((i) => {
-          const active = i.key === activeKey;
+      {/* Institutions grouped under country headings */}
+      <div className="space-y-3">
+        {(country === "All" ? countries : [country]).map((c) => {
+          const group = inRegion.filter((i) => i.country === c);
+          if (!group.length) return null;
           return (
-            <button
-              key={i.key}
-              onClick={() => onSelectInst(i.key)}
-              className={`shrink-0 rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition ${
-                active ? "text-[#0b0f19]" : "border border-white/10 bg-white/5 text-white/60 hover:text-white"
-              }`}
-              style={active ? { background: accentFor(i) } : undefined}
-            >
-              {i.name}
-            </button>
+            <div key={c} className="space-y-1.5">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">
+                {c} <span className="text-white/25">· {group.length}</span>
+              </p>
+              <div className="-mx-4 flex gap-1.5 overflow-x-auto scrollbar-none px-4 pb-1">
+                {group.map((i) => {
+                  const active = i.key === activeKey;
+                  return (
+                    <button
+                      key={i.key}
+                      onClick={() => onSelectInst(i.key)}
+                      className={`shrink-0 rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition ${
+                        active ? "text-[#0b0f19]" : "border border-white/10 bg-white/5 text-white/60 hover:text-white"
+                      }`}
+                      style={active ? { background: accentFor(i) } : undefined}
+                    >
+                      {i.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </div>
