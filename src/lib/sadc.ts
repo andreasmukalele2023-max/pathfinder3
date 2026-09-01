@@ -18,7 +18,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.up.ac.za",
     applyUrl: "https://www.up.ac.za/apply",
     portalName: "UP Online Application",
-    applicationDeadline: "2026-06-30",
+    applicationDeadline: "2027-06-30",
     faculties: [
       {
         name: "Health Sciences",
@@ -48,7 +48,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.uct.ac.za",
     applyUrl: "https://applyonline.uct.ac.za",
     portalName: "UCT Apply Online",
-    applicationDeadline: "2026-07-31",
+    applicationDeadline: "2027-07-31",
     faculties: [
       {
         name: "Health Sciences",
@@ -77,7 +77,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.wits.ac.za",
     applyUrl: "https://www.wits.ac.za/applications/",
     portalName: "Wits Self Service",
-    applicationDeadline: "2026-06-30",
+    applicationDeadline: "2027-06-30",
     faculties: [
       {
         name: "Health Sciences",
@@ -106,7 +106,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.sun.ac.za",
     applyUrl: "https://www.maties.com/apply",
     portalName: "Stellenbosch Apply",
-    applicationDeadline: "2026-07-31",
+    applicationDeadline: "2027-07-31",
     faculties: [
       {
         name: "Science, AgriSciences & Engineering",
@@ -128,7 +128,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.ub.bw",
     applyUrl: "https://www.ub.bw/admissions",
     portalName: "UB Admissions",
-    applicationDeadline: "2026-09-30",
+    applicationDeadline: "2027-09-30",
     faculties: [
       {
         name: "Health Sciences & Medicine",
@@ -157,7 +157,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.biust.ac.bw",
     applyUrl: "https://www.biust.ac.bw/admissions",
     portalName: "BIUST Admissions",
-    applicationDeadline: "2026-09-30",
+    applicationDeadline: "2027-09-30",
     faculties: [
       {
         name: "Science & Engineering",
@@ -179,7 +179,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.uz.ac.zw",
     applyUrl: "https://www.uz.ac.zw/index.php/admissions",
     portalName: "UZ Admissions",
-    applicationDeadline: "2026-08-31",
+    applicationDeadline: "2027-08-31",
     faculties: [
       {
         name: "Medicine & Health Sciences",
@@ -207,7 +207,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.nust.ac.zw",
     applyUrl: "https://www.nust.ac.zw/admissions",
     portalName: "NUST Zimbabwe Admissions",
-    applicationDeadline: "2026-08-31",
+    applicationDeadline: "2027-08-31",
     faculties: [
       {
         name: "Applied Sciences & Engineering",
@@ -228,7 +228,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.unza.zm",
     applyUrl: "https://apply.unza.zm",
     portalName: "UNZA Apply",
-    applicationDeadline: "2026-09-30",
+    applicationDeadline: "2027-09-30",
     faculties: [
       {
         name: "Medicine & Health",
@@ -256,7 +256,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.cbu.ac.zm",
     applyUrl: "https://www.cbu.ac.zm/admissions",
     portalName: "CBU Admissions",
-    applicationDeadline: "2026-09-30",
+    applicationDeadline: "2027-09-30",
     faculties: [
       {
         name: "Engineering & Built Environment",
@@ -277,7 +277,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.uan.ao",
     applyUrl: "https://www.uan.ao",
     portalName: "UAN Admissions",
-    applicationDeadline: "2026-07-31",
+    applicationDeadline: "2027-07-31",
     faculties: [
       {
         name: "Medicine, Science & Engineering",
@@ -299,7 +299,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.uneswa.ac.sz",
     applyUrl: "https://www.uneswa.ac.sz/admissions/",
     portalName: "UNESWA Admissions",
-    applicationDeadline: "2026-08-31",
+    applicationDeadline: "2027-08-31",
     faculties: [
       {
         name: "Science, Health & Commerce",
@@ -321,7 +321,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.nul.ls",
     applyUrl: "https://www.nul.ls/admissions",
     portalName: "NUL Admissions",
-    applicationDeadline: "2026-08-31",
+    applicationDeadline: "2027-08-31",
     faculties: [
       {
         name: "Science, Law & Humanities",
@@ -343,7 +343,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.unima.ac.mw",
     applyUrl: "https://www.unima.ac.mw/admissions",
     portalName: "UNIMA Admissions",
-    applicationDeadline: "2026-08-31",
+    applicationDeadline: "2027-08-31",
     faculties: [
       {
         name: "Science & Social Science",
@@ -364,7 +364,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.uem.mz",
     applyUrl: "https://www.uem.mz",
     portalName: "UEM Admissions",
-    applicationDeadline: "2026-07-31",
+    applicationDeadline: "2027-07-31",
     faculties: [
       {
         name: "Engineering, Medicine & Sciences",
@@ -385,7 +385,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.udsm.ac.tz",
     applyUrl: "https://aris.udsm.ac.tz",
     portalName: "UDSM ARIS",
-    applicationDeadline: "2026-08-31",
+    applicationDeadline: "2027-08-31",
     faculties: [
       {
         name: "Engineering, Science & Business",
@@ -406,7 +406,7 @@ export const SADC_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.uom.ac.mu",
     applyUrl: "https://www.uom.ac.mu/admissions",
     portalName: "UoM Admissions",
-    applicationDeadline: "2026-07-31",
+    applicationDeadline: "2027-07-31",
     faculties: [
       {
         name: "Engineering, ICT & Science",

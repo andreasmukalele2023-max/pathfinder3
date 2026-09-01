@@ -14,7 +14,7 @@ export interface SubjectEntry {
   grade: Grade | "";
 }
 
-/** 2026 curriculum: Physical Science is split into Chemistry and Physics. */
+/** 2027 curriculum: Physical Science is split into Chemistry and Physics. */
 export const SUBJECT_GROUPS: { group: string; subjects: string[] }[] = [
   {
     group: "Core & Sciences",
@@ -99,9 +99,9 @@ const NSSCO_POINTS: Record<NSSCOGrade, number> = {
 
 /** Institution-specific NSSCAS (Advanced Subsidiary) conversion scales. */
 const NSSCA_SCALES: Record<string, Record<NSSCAGrade, number>> = {
-  // UNAM 2026: AS grades carry a full premium over Ordinary level
+  // UNAM 2027: AS grades carry a full premium over Ordinary level
   UNAM: { A: 10, B: 9, C: 8, D: 7, E: 6, U: 0 },
-  // NUST 2026: AS conversion is one band lower than UNAM's
+  // NUST 2027: AS conversion is one band lower than UNAM's
   NUST: { A: 9, B: 8, C: 7, D: 6, E: 5, U: 0 },
   // Default (IUM, Welwitchia, TC, IOL, SBS, NIPAM) follow the national AS scale
   DEFAULT: { A: 10, B: 9, C: 8, D: 7, E: 6, U: 0 },
