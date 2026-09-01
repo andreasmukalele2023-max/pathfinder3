@@ -10,7 +10,7 @@ import {
   type SubjectEntry,
 } from "./points";
 
-export const PROSPECTUS_YEAR = 2026;
+export const PROSPECTUS_YEAR = 2027;
 
 /** Subjects accepted for a requirement (2026 Physical Science split rule). */
 export function acceptedSubjects(req: CourseRequirement): string[] {

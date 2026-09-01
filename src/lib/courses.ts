@@ -4,7 +4,7 @@ import { SADC_INSTITUTIONS } from "./sadc";
 export interface CourseRequirement {
   subject: string;
   minGrade: NSSCOGrade;
-  /** 2026 prospectus: any ONE of these subjects satisfies the requirement. */
+  /** 2027 prospectus: any ONE of these subjects satisfies the requirement. */
   anyOf?: string[];
 }
 
@@ -54,7 +54,7 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.unam.edu.na",
     applyUrl: "https://application.unam.edu.na",
     portalName: "UNAM Online Application",
-    applicationDeadline: "2026-08-31",
+    applicationDeadline: "2027-08-31",
     faculties: [
       {
         name: "Health Sciences & Veterinary Medicine",
@@ -125,7 +125,7 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.nust.na",
     applyUrl: "https://ienabler.nust.na/pls/prodi41/w99pkg.mi_login",
     portalName: "NUST iEnabler",
-    applicationDeadline: "2026-08-31",
+    applicationDeadline: "2027-08-31",
     faculties: [
       {
         name: "Computing & Informatics",
@@ -188,7 +188,7 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.ium.edu.na",
     applyUrl: "https://www.ium.edu.na/apply/",
     portalName: "IUM Application Portal",
-    applicationDeadline: "2026-11-30",
+    applicationDeadline: "2027-11-30",
     faculties: [
       {
         name: "Business Administration & Information Technology",
@@ -235,7 +235,7 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
     officialSite: "https://welwitchiauniversity.edu.na",
     applyUrl: "https://welwitchiauniversity.edu.na/apply/",
     portalName: "Welwitchia Apply Online",
-    applicationDeadline: "2026-11-30",
+    applicationDeadline: "2027-11-30",
     faculties: [
       {
         name: "Nursing, Pharmacy & Health Sciences",
@@ -259,7 +259,7 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.triumphantcollege.com",
     applyUrl: "https://www.triumphantcollege.com/apply",
     portalName: "Triumphant College Apply",
-    applicationDeadline: "2026-11-30",
+    applicationDeadline: "2027-11-30",
     faculties: [
       {
         name: "Engineering, IT & Business",
@@ -283,7 +283,7 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
     officialSite: "https://iol.edu.na",
     applyUrl: "https://iol.edu.na/apply/",
     portalName: "IOL Registration",
-    applicationDeadline: "2026-11-30",
+    applicationDeadline: "2027-11-30",
     faculties: [
       {
         name: "Education & Open Learning",
@@ -307,7 +307,7 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
     officialSite: "https://www.sbsnamibia.com",
     applyUrl: "https://www.sbsnamibia.com/apply/",
     portalName: "SBS Namibia Apply",
-    applicationDeadline: "2026-11-30",
+    applicationDeadline: "2027-11-30",
     faculties: [
       {
         name: "Management, Safety & Public Sector",
@@ -331,7 +331,7 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
     officialSite: "https://nipam.na",
     applyUrl: "https://nipam.na/apply/",
     portalName: "NIPAM Registration",
-    applicationDeadline: "2026-11-30",
+    applicationDeadline: "2027-11-30",
     faculties: [
       {
         name: "Public Governance & Administration",
