@@ -12,7 +12,7 @@ import {
 
 export const PROSPECTUS_YEAR = 2027;
 
-/** Subjects accepted for a requirement (2026 Physical Science split rule). */
+/** Subjects accepted for a requirement (2027 Physical Science split rule). */
 export function acceptedSubjects(req: CourseRequirement): string[] {
   return req.anyOf && req.anyOf.length > 0 ? req.anyOf : [req.subject];
 }
