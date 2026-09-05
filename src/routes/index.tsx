@@ -543,9 +543,7 @@ function CoursesView({
 
   return (
     <div className="space-y-4">
-      <RegionSwitcher
-        region={region}
-        setRegion={setRegion}
+      <CountrySwitcher
         country={country}
         setCountry={setCountry}
         activeKey={inst.key}
