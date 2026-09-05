@@ -463,7 +463,6 @@ function CoursesView({
   onToggleSave: (c: EvaluatedCourse) => void;
 }) {
   const [query, setQuery] = useState("");
-  const [region, setRegion] = useState<"Namibia" | "SADC">(inst.region);
   const [country, setCountry] = useState<string>("All");
   const [levels, setLevels] = useState<string[]>([]);
   const [faculty, setFaculty] = useState("All");
@@ -544,9 +543,7 @@ function CoursesView({
 
   return (
     <div className="space-y-4">
-      <RegionSwitcher
-        region={region}
-        setRegion={setRegion}
+      <CountrySwitcher
         country={country}
         setCountry={setCountry}
         activeKey={inst.key}
@@ -1207,78 +1204,62 @@ function Onboarding({
   );
 }
 
-/* --------------------------- Region switcher ------------------------------ */
+/* --------------------------- Country switcher ------------------------------ */
 
-function RegionSwitcher({
-  region,
-  setRegion,
+function CountrySwitcher({
   country,
   setCountry,
   activeKey,
   onSelectInst,
 }: {
-  region: "Namibia" | "SADC";
-  setRegion: (r: "Namibia" | "SADC") => void;
   country: string;
   setCountry: (c: string) => void;
   activeKey: InstitutionKey;
   onSelectInst: (k: InstitutionKey) => void;
 }) {
-  const inRegion = INSTITUTIONS.filter((i) => i.region === region);
-  const countries = Array.from(new Set(inRegion.map((i) => i.country)));
-
-  const switchRegion = (r: "Namibia" | "SADC") => {
-    setRegion(r);
-    setCountry("All");
-    const first = INSTITUTIONS.find((i) => i.region === r);
-    if (first) onSelectInst(first.key);
-  };
+  // Namibia first, then all SADC countries in data order.
+  const countries = Array.from(new Set(INSTITUTIONS.map((i) => i.country)));
 
   return (
-    <div className="space-y-2">
-      <div className="grid grid-cols-2 gap-1.5 rounded-2xl border border-white/10 bg-white/5 p-1">
-        {(["Namibia", "SADC"] as const).map((r) => (
+    <div className="space-y-3">
+      {/* Country buttons */}
+      <div className="-mx-4 flex gap-1.5 overflow-x-auto scrollbar-none px-4">
+        <button
+          onClick={() => setCountry("All")}
+          className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-bold transition ${
+            country === "All"
+              ? "border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)]"
+              : "border-white/10 bg-white/5 text-white/60 hover:text-white"
+          }`}
+        >
+          All countries
+        </button>
+        {countries.map((c) => (
           <button
-            key={r}
-            onClick={() => switchRegion(r)}
-            className={`rounded-xl px-3 py-2 text-[11px] font-bold uppercase tracking-wider transition ${
-              region === r
-                ? "bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] text-[#0b0f19]"
-                : "text-white/60 hover:text-white"
+            key={c}
+            onClick={() => {
+              const next = country === c ? "All" : c;
+              setCountry(next);
+              if (next !== "All") {
+                const first = INSTITUTIONS.find((i) => i.country === c);
+                if (first) onSelectInst(first.key);
+              }
+            }}
+            className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-bold transition ${
+              country === c
+                ? "border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)]"
+                : "border-white/10 bg-white/5 text-white/60 hover:text-white"
             }`}
           >
-            {r === "Namibia" ? "Namibian institutions" : "SADC region"}
+            {c}
           </button>
         ))}
       </div>
 
-      {/* Country buttons */}
-      {countries.length > 1 && (
-        <div className="-mx-4 flex gap-1.5 overflow-x-auto scrollbar-none px-4">
-          {countries.map((c) => (
-            <button
-              key={c}
-              onClick={() => {
-                setCountry(country === c ? "All" : c);
-                const first = inRegion.find((i) => i.country === c);
-                if (first && country !== c) onSelectInst(first.key);
-              }}
-              className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-bold transition ${
-                country === c
-                  ? "border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)]"
-                  : "border-white/10 bg-white/5 text-white/60 hover:text-white"
-              }`}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      )}
-
       {/* Institutions grouped under country headings */}
       <div className="space-y-3">
         {(country === "All" ? countries : [country]).map((c) => {
-          const group = inRegion.filter((i) => i.country === c);
+          const group = INSTITUTIONS.filter((i) => i.country === c);
           if (!group.length) return null;
           return (
             <div key={c} className="space-y-1.5">
