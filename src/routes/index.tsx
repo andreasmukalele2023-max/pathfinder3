@@ -463,7 +463,6 @@ function CoursesView({
   onToggleSave: (c: EvaluatedCourse) => void;
 }) {
   const [query, setQuery] = useState("");
-  const [region, setRegion] = useState<"Namibia" | "SADC">(inst.region);
   const [country, setCountry] = useState<string>("All");
   const [levels, setLevels] = useState<string[]>([]);
   const [faculty, setFaculty] = useState("All");
