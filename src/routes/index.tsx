@@ -606,7 +606,7 @@ function CoursesView({
         </div>
 
         {/* Level pill carousel */}
-        <div className="-mx-4 mt-3 flex gap-1.5 overflow-x-auto scrollbar-none px-4">
+        <div className="mt-3 flex flex-wrap gap-1.5">
           <button
             onClick={() => setLevels([])}
             className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
@@ -1223,7 +1223,7 @@ function CountrySwitcher({
   return (
     <div className="space-y-3">
       {/* Country buttons */}
-      <div className="-mx-4 flex gap-1.5 overflow-x-auto scrollbar-none px-4">
+      <div className="flex flex-wrap gap-1.5">
         <button
           onClick={() => setCountry("All")}
           className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-bold transition ${
@@ -1266,7 +1266,7 @@ function CountrySwitcher({
               <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">
                 {c} <span className="text-white/25">· {group.length}</span>
               </p>
-              <div className="-mx-4 flex gap-1.5 overflow-x-auto scrollbar-none px-4 pb-1">
+              <div className="flex flex-wrap gap-1.5 pb-1">
                 {group.map((i) => {
                   const active = i.key === activeKey;
                   return (
