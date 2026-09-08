@@ -45,12 +45,22 @@ function AuthPage() {
     setMsg(null);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: `${window.location.origin}/` },
         });
         if (error) throw error;
+        if (data.session) {
+          navigate({ to: "/" });
+          return;
+        }
+        // No session yet — try signing straight in (auto-confirm projects).
+        const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+        if (!signInErr) {
+          navigate({ to: "/" });
+          return;
+        }
         setMsg({ tone: "ok", text: "Account created. Check your email to confirm, then sign in." });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
