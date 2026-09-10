@@ -3,10 +3,7 @@
   publish = "dist"
 
 [build.environment]
-  NITRO_PRESET = "netlify"
   NODE_VERSION = "20"
 
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/server"
-  status = 200
+# No manual redirects here: the Netlify build target generates dist/_redirects
+# and .netlify/functions-internal/server so every route is server-rendered.
