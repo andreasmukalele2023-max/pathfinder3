@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { Info, Plus, Trash2, X, Sparkles, Download, Wand2 } from "lucide-react";
 import {
-  SUBJECT_GROUPS,
+  subjectGroupsFor,
+  isSubjectOffered,
   NSSCO_GRADES,
   NSSCA_GRADES,
   explainEntry,
