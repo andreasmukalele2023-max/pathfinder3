@@ -14,20 +14,24 @@ export interface SubjectEntry {
   grade: Grade | "";
 }
 
-/** 2027 curriculum: Physical Science is split into Chemistry and Physics. */
-export const SUBJECT_GROUPS: { group: string; subjects: string[] }[] = [
+/**
+ * Official NIED senior-secondary subject offering (NSSCO, Ordinary Level).
+ * Source: NIED senior secondary syllabus register. Physical Science no longer
+ * exists — the sciences are examined separately as Physics and Chemistry.
+ */
+export const NSSCO_SUBJECT_GROUPS: { group: string; subjects: string[] }[] = [
   {
     group: "Core & Sciences",
     subjects: [
       "English",
       "Mathematics",
-      "Additional Mathematics",
       "Biology",
       "Chemistry",
       "Physics",
-      "Life Science",
       "Agriculture",
+      "Agricultural Science",
       "Geography",
+      "Life Skills",
     ],
   },
   {
@@ -37,12 +41,9 @@ export const SUBJECT_GROUPS: { group: string; subjects: string[] }[] = [
       "Business Studies",
       "Economics",
       "Entrepreneurship",
-      "Office Administration",
       "Development Studies",
       "History",
-      "Religious & Moral Education",
-      "Life Skills",
-      "Sociology",
+      "Office Practice",
     ],
   },
   {
@@ -51,43 +52,91 @@ export const SUBJECT_GROUPS: { group: string; subjects: string[] }[] = [
       "Computer Studies",
       "Information & Communication Technology (ICT)",
       "Design & Technology",
-      "Technical Drawing",
+      "Building Studies",
       "Woodwork",
-      "Metalwork",
-      "Engineering Studies",
     ],
   },
   {
     group: "Home Sciences & Hospitality",
-    subjects: ["Home Economics", "Fashion & Fabrics", "Hospitality", "Food & Nutrition"],
+    subjects: ["Home Economics", "Fashion & Fabrics", "Hospitality"],
   },
   {
     group: "Arts & Physical Education",
-    subjects: ["Art & Design", "Music", "Physical Education", "Drama & Theatre Arts"],
+    subjects: ["Art & Design", "Integrated Performing Arts", "Physical Education"],
   },
   {
     group: "Namibian Languages",
     subjects: [
       "Afrikaans",
+      "Khoekhoegowab",
       "Oshindonga",
       "Oshikwanyama",
       "Otjiherero",
       "Rukwangali",
+      "Rumanyo",
       "Silozi",
-      "Setswana",
-      "Khoekhoegowab",
-      "Ju|'hoansi",
       "Thimbukushu",
-      "Namibian Sign Language",
     ],
   },
   {
     group: "Foreign Languages",
-    subjects: ["German", "French", "Portuguese", "Spanish", "Chinese (Mandarin)"],
+    subjects: ["German", "French"],
   },
 ];
 
-export const SUBJECTS = SUBJECT_GROUPS.flatMap((g) => g.subjects);
+/**
+ * Official NIED NSSCAS (Advanced Subsidiary, Grade 12) subject offering.
+ * Considerably narrower than the Ordinary Level list.
+ */
+export const NSSCA_SUBJECT_GROUPS: { group: string; subjects: string[] }[] = [
+  {
+    group: "Core & Sciences",
+    subjects: ["English", "Mathematics", "Biology", "Chemistry", "Physics", "Agricultural Science", "Geography"],
+  },
+  {
+    group: "Commerce & Social Sciences",
+    subjects: ["Accounting", "Business Studies", "Economics", "Entrepreneurship", "History", "Social Studies", "Life Skills"],
+  },
+  {
+    group: "Technology & ICT",
+    subjects: [
+      "Computer Science",
+      "Information & Communication Technology (ICT)",
+      "Design & Technology",
+      "Motor Mechanics",
+    ],
+  },
+  {
+    group: "Arts",
+    subjects: ["Art & Design"],
+  },
+  {
+    group: "Namibian Languages",
+    subjects: ["Afrikaans", "Khoekhoegowab", "Oshikwanyama", "Silozi", "Thimbukushu"],
+  },
+  {
+    group: "Foreign Languages",
+    subjects: ["German", "French"],
+  },
+];
+
+export function subjectGroupsFor(level: Level) {
+  return level === "NSSCA" ? NSSCA_SUBJECT_GROUPS : NSSCO_SUBJECT_GROUPS;
+}
+
+export function subjectsFor(level: Level): string[] {
+  return subjectGroupsFor(level).flatMap((g) => g.subjects);
+}
+
+export function isSubjectOffered(subject: string, level: Level): boolean {
+  return subjectsFor(level).some((s) => s.toLowerCase() === subject.toLowerCase());
+}
+
+/** Backwards-compatible full list (Ordinary Level offering). */
+export const SUBJECT_GROUPS = NSSCO_SUBJECT_GROUPS;
+
+export const SUBJECTS = Array.from(new Set([...subjectsFor("NSSCO"), ...subjectsFor("NSSCA")]));
+
 
 
 export const NSSCO_GRADES: NSSCOGrade[] = ["A*", "A", "B", "C", "D", "E", "F", "G", "U"];
