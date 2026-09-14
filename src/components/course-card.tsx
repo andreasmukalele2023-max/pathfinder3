@@ -6,6 +6,7 @@ import {
   BookmarkCheck,
   CalendarClock,
   CheckCircle2,
+  ChevronRight,
   Clock,
   ExternalLink,
   Lock,
@@ -13,7 +14,7 @@ import {
   Wrench,
   X,
 } from "lucide-react";
-import type { Institution } from "@/lib/courses";
+import type { Course, Institution } from "@/lib/courses";
 import type { SubjectEntry } from "@/lib/points";
 import type { EvaluatedCourse } from "@/lib/evaluate";
 import { courseLevel } from "@/lib/evaluate";
