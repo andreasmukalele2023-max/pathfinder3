@@ -28,7 +28,7 @@ For each programme return:
 - duration: e.g. "3 years", "4 years"
 - minPoints: integer minimum admission points required (null if not stated)
 - bestN: 5 or 6 (Namibian NSSCO best-N rule; default 6 if unclear)
-- requirements: list of { subject, minGrade } where minGrade is an NSSCO letter A/B/C/D/E for any explicitly required subjects (English, Mathematics, Biology, Physical Science, Chemistry, Physics, etc.)
+- requirements: list of { subject, minGrade } where minGrade is an NSSCO letter A/B/C/D/E for any explicitly required subjects (English, Mathematics, Biology, Chemistry, Physics, etc.)
 Return { "courses": [...] }.`;
 
 const SCHEMA = {

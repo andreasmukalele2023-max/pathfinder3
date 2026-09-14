@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { ArrowLeft, Cpu, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -74,21 +73,6 @@ function AuthPage() {
     }
   };
 
-  const google = async () => {
-    setBusy(true);
-    setMsg(null);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-      extraParams: { prompt: "select_account" },
-    });
-    if (result.error) {
-      setMsg({ tone: "err", text: result.error.message });
-      setBusy(false);
-      return;
-    }
-    if (result.redirected) return;
-    navigate({ to: "/" });
-  };
 
   return (
     <div className="flex min-h-[100dvh] w-full items-center justify-center overflow-x-hidden px-4 py-10">
@@ -113,20 +97,6 @@ function AuthPage() {
             </div>
           </div>
 
-          <button
-            onClick={google}
-            disabled={busy}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-bold transition hover:bg-white/10 disabled:opacity-50"
-          >
-            <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
-              <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.7 4.1-5.5 4.1a6.2 6.2 0 1 1 0-12.4c1.9 0 3.2.8 4 1.5l2.7-2.6C17 3 14.7 2 12 2a10 10 0 1 0 0 20c5.8 0 9.6-4.1 9.6-9.8 0-.7-.1-1.2-.2-1.9H12z" />
-            </svg>
-            Continue with Google
-          </button>
-
-          <div className="my-4 flex items-center gap-3 text-[10px] uppercase tracking-widest text-white/30">
-            <span className="h-px flex-1 bg-white/10" /> or email <span className="h-px flex-1 bg-white/10" />
-          </div>
 
           <form onSubmit={submit} className="space-y-2.5">
             <input
