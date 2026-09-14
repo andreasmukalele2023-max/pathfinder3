@@ -3,9 +3,15 @@ export type NSSCOGrade = "A*" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "U";
 export type NSSCAGrade = "A" | "B" | "C" | "D" | "E" | "U";
 export type Grade = NSSCOGrade | NSSCAGrade;
 
-/** Institution identifier. Namibian keys (UNAM, NUST, …) plus SADC keys. */
-export type InstitutionKey = string;
-
+export type InstitutionKey =
+  | "UNAM"
+  | "NUST"
+  | "IUM"
+  | "Welwitchia"
+  | "TC"
+  | "IOL"
+  | "SBS"
+  | "NIPAM";
 
 export interface SubjectEntry {
   id: string;
@@ -14,24 +20,20 @@ export interface SubjectEntry {
   grade: Grade | "";
 }
 
-/**
- * Official NIED senior-secondary subject offering (NSSCO, Ordinary Level).
- * Source: NIED senior secondary syllabus register. Physical Science no longer
- * exists — the sciences are examined separately as Physics and Chemistry.
- */
-export const NSSCO_SUBJECT_GROUPS: { group: string; subjects: string[] }[] = [
+/** 2026 curriculum: Physical Science is split into Chemistry and Physics. */
+export const SUBJECT_GROUPS: { group: string; subjects: string[] }[] = [
   {
     group: "Core & Sciences",
     subjects: [
       "English",
       "Mathematics",
+      "Additional Mathematics",
       "Biology",
       "Chemistry",
       "Physics",
+      "Life Science",
       "Agriculture",
-      "Agricultural Science",
       "Geography",
-      "Life Skills",
     ],
   },
   {
@@ -41,9 +43,12 @@ export const NSSCO_SUBJECT_GROUPS: { group: string; subjects: string[] }[] = [
       "Business Studies",
       "Economics",
       "Entrepreneurship",
+      "Office Administration",
       "Development Studies",
       "History",
-      "Office Practice",
+      "Religious & Moral Education",
+      "Life Skills",
+      "Sociology",
     ],
   },
   {
@@ -52,91 +57,43 @@ export const NSSCO_SUBJECT_GROUPS: { group: string; subjects: string[] }[] = [
       "Computer Studies",
       "Information & Communication Technology (ICT)",
       "Design & Technology",
-      "Building Studies",
+      "Technical Drawing",
       "Woodwork",
+      "Metalwork",
+      "Engineering Studies",
     ],
   },
   {
     group: "Home Sciences & Hospitality",
-    subjects: ["Home Economics", "Fashion & Fabrics", "Hospitality"],
+    subjects: ["Home Economics", "Fashion & Fabrics", "Hospitality", "Food & Nutrition"],
   },
   {
     group: "Arts & Physical Education",
-    subjects: ["Art & Design", "Integrated Performing Arts", "Physical Education"],
+    subjects: ["Art & Design", "Music", "Physical Education", "Drama & Theatre Arts"],
   },
   {
     group: "Namibian Languages",
     subjects: [
       "Afrikaans",
-      "Khoekhoegowab",
       "Oshindonga",
       "Oshikwanyama",
       "Otjiherero",
       "Rukwangali",
-      "Rumanyo",
       "Silozi",
+      "Setswana",
+      "Khoekhoegowab",
+      "Ju|'hoansi",
       "Thimbukushu",
+      "Namibian Sign Language",
     ],
   },
   {
     group: "Foreign Languages",
-    subjects: ["German", "French"],
+    subjects: ["German", "French", "Portuguese", "Spanish", "Chinese (Mandarin)"],
   },
 ];
 
-/**
- * Official NIED NSSCAS (Advanced Subsidiary, Grade 12) subject offering.
- * Considerably narrower than the Ordinary Level list.
- */
-export const NSSCA_SUBJECT_GROUPS: { group: string; subjects: string[] }[] = [
-  {
-    group: "Core & Sciences",
-    subjects: ["English", "Mathematics", "Biology", "Chemistry", "Physics", "Agricultural Science", "Geography"],
-  },
-  {
-    group: "Commerce & Social Sciences",
-    subjects: ["Accounting", "Business Studies", "Economics", "Entrepreneurship", "History", "Social Studies", "Life Skills"],
-  },
-  {
-    group: "Technology & ICT",
-    subjects: [
-      "Computer Science",
-      "Information & Communication Technology (ICT)",
-      "Design & Technology",
-      "Motor Mechanics",
-    ],
-  },
-  {
-    group: "Arts",
-    subjects: ["Art & Design"],
-  },
-  {
-    group: "Namibian Languages",
-    subjects: ["Afrikaans", "Khoekhoegowab", "Oshikwanyama", "Silozi", "Thimbukushu"],
-  },
-  {
-    group: "Foreign Languages",
-    subjects: ["German", "French"],
-  },
-];
-
-export function subjectGroupsFor(level: Level) {
-  return level === "NSSCA" ? NSSCA_SUBJECT_GROUPS : NSSCO_SUBJECT_GROUPS;
-}
-
-export function subjectsFor(level: Level): string[] {
-  return subjectGroupsFor(level).flatMap((g) => g.subjects);
-}
-
-export function isSubjectOffered(subject: string, level: Level): boolean {
-  return subjectsFor(level).some((s) => s.toLowerCase() === subject.toLowerCase());
-}
-
-/** Backwards-compatible full list (Ordinary Level offering). */
-export const SUBJECT_GROUPS = NSSCO_SUBJECT_GROUPS;
-
-export const SUBJECTS = Array.from(new Set([...subjectsFor("NSSCO"), ...subjectsFor("NSSCA")]));
-
+export const SUBJECTS = SUBJECT_GROUPS.flatMap((g) => g.subjects);
 
 
 export const NSSCO_GRADES: NSSCOGrade[] = ["A*", "A", "B", "C", "D", "E", "F", "G", "U"];
@@ -148,9 +105,9 @@ const NSSCO_POINTS: Record<NSSCOGrade, number> = {
 
 /** Institution-specific NSSCAS (Advanced Subsidiary) conversion scales. */
 const NSSCA_SCALES: Record<string, Record<NSSCAGrade, number>> = {
-  // UNAM 2027: AS grades carry a full premium over Ordinary level
+  // UNAM 2026: AS grades carry a full premium over Ordinary level
   UNAM: { A: 10, B: 9, C: 8, D: 7, E: 6, U: 0 },
-  // NUST 2027: AS conversion is one band lower than UNAM's
+  // NUST 2026: AS conversion is one band lower than UNAM's
   NUST: { A: 9, B: 8, C: 7, D: 6, E: 5, U: 0 },
   // Default (IUM, Welwitchia, TC, IOL, SBS, NIPAM) follow the national AS scale
   DEFAULT: { A: 10, B: 9, C: 8, D: 7, E: 6, U: 0 },

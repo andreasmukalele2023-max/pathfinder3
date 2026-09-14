@@ -1,10 +1,9 @@
 import type { NSSCOGrade } from "./points";
-import { SADC_INSTITUTIONS } from "./sadc";
 
 export interface CourseRequirement {
   subject: string;
   minGrade: NSSCOGrade;
-  /** 2027 prospectus: any ONE of these subjects satisfies the requirement. */
+  /** 2026 prospectus: any ONE of these subjects satisfies the requirement. */
   anyOf?: string[];
 }
 
@@ -26,15 +25,9 @@ export interface Faculty {
 }
 
 export interface Institution {
-  key: string;
+  key: "UNAM" | "NUST" | "IUM" | "Welwitchia" | "TC" | "IOL" | "SBS" | "NIPAM";
   name: string;
   fullName: string;
-  /** Country the institution is based in. */
-  country: string;
-  /** "Namibia" for local institutions, "SADC" for accredited regional ones. */
-  region: "Namibia" | "SADC";
-  /** Brand colour used for pills and badges. */
-  accent?: string;
   officialSite: string;
   applyUrl: string;
   portalName: string;
@@ -43,18 +36,15 @@ export interface Institution {
   faculties: Faculty[];
 }
 
-export const NAMIBIAN_INSTITUTIONS: Institution[] = [
+export const INSTITUTIONS: Institution[] = [
   {
     key: "UNAM",
-    country: "Namibia",
-    region: "Namibia",
-    accent: "#00f3ff",
     name: "UNAM",
     fullName: "University of Namibia",
     officialSite: "https://www.unam.edu.na",
     applyUrl: "https://application.unam.edu.na",
     portalName: "UNAM Online Application",
-    applicationDeadline: "2027-08-31",
+    applicationDeadline: "2026-08-31",
     faculties: [
       {
         name: "Health Sciences & Veterinary Medicine",
@@ -65,15 +55,7 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
           { name: "Bachelor of Nursing Science (Honours)", duration: "4 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }, { subject: "Physics", anyOf: ["Physics", "Chemistry"], minGrade: "D" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
           { name: "Bachelor of Radiography (Diagnostic)", duration: "4 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Physics", anyOf: ["Physics", "Chemistry"], minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
           { name: "Bachelor of Veterinary Medicine (BVM)", duration: "6 years", minPoints: 34, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "B" }, { subject: "Chemistry", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Occupational Therapy (Honours)", duration: "4 years", minPoints: 31, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Physiotherapy (Honours)", duration: "4 years", minPoints: 31, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }, { subject: "Physics", anyOf: ["Physics", "Chemistry"], minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Science in Physiology", duration: "3 years", minPoints: 28, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Public Health (Honours)", duration: "4 years", minPoints: 28, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Environmental Health Sciences (Honours)", duration: "4 years", minPoints: 28, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Medical Laboratory Sciences (Honours)", duration: "4 years", minPoints: 31, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }, { subject: "Chemistry", anyOf: ["Chemistry", "Physics"], minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Sport Science & Human Movement", duration: "3 years", minPoints: 26, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "D" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
           { name: "Diploma in General Nursing and Midwifery", duration: "3 years", minPoints: 25, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }, { subject: "Biology", minGrade: "D" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Certificate in Basic Health Care (Emergency Care)", duration: "1 year", minPoints: 20, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
         ],
       },
       {
@@ -98,9 +80,6 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
           { name: "Bachelor of Electrical Engineering (Honours)", duration: "4 years", minPoints: 32, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }, { subject: "Physics", anyOf: ["Physics", "Chemistry"], minGrade: "B" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
           { name: "Bachelor of Mining Engineering (Honours)", duration: "4 years", minPoints: 32, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }, { subject: "Physics", anyOf: ["Physics", "Chemistry"], minGrade: "B" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
           { name: "Bachelor of Electronics & Computer Engineering", duration: "4 years", minPoints: 32, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }, { subject: "Physics", anyOf: ["Physics", "Chemistry"], minGrade: "B" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Metallurgical Engineering (Honours)", duration: "4 years", minPoints: 32, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }, { subject: "Chemistry", minGrade: "B" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Agricultural Engineering (Honours)", duration: "4 years", minPoints: 31, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }, { subject: "Physics", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Science in Land Administration", duration: "3 years", minPoints: 27, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
         ],
       },
       {
@@ -111,16 +90,6 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
           { name: "Bachelor of Science (Biology & Chemistry)", duration: "3 years", minPoints: 28, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
           { name: "Bachelor of Science in Agriculture (Animal Science)", duration: "4 years", minPoints: 28, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
           { name: "Bachelor of Science in Wildlife Management & Tourism", duration: "3 years", minPoints: 26, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "D" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Science (Mathematics & Statistics)", duration: "3 years", minPoints: 29, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Science (Physics & Chemistry)", duration: "3 years", minPoints: 29, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }, { subject: "Physics", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Science (Geology)", duration: "3 years", minPoints: 29, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Science (Geography & Environmental Studies)", duration: "3 years", minPoints: 27, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Science in Fisheries & Aquatic Sciences", duration: "4 years", minPoints: 27, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Science in Agriculture (Crop Science)", duration: "4 years", minPoints: 28, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Science in Agricultural Economics", duration: "4 years", minPoints: 27, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Science in Food Science & Technology", duration: "4 years", minPoints: 28, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Chemistry", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Science in Horticulture", duration: "4 years", minPoints: 26, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "D" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Diploma in Agriculture", duration: "3 years", minPoints: 23, bestN: 6, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }, { subject: "Biology", minGrade: "D" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
         ],
       },
       {
@@ -132,32 +101,18 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
           { name: "Bachelor of Arts in Media Studies & Communication", duration: "3 years", minPoints: 25, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
           { name: "Bachelor of Social Work (Honours)", duration: "4 years", minPoints: 25, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
           { name: "Bachelor of Psychology (Honours)", duration: "4 years", minPoints: 27, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Arts (English & Linguistics)", duration: "3 years", minPoints: 25, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Arts (History & Political Studies)", duration: "3 years", minPoints: 25, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Arts (Sociology)", duration: "3 years", minPoints: 25, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Arts (Geography & Environmental Studies)", duration: "3 years", minPoints: 25, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Arts (Visual & Performing Arts)", duration: "3 years", minPoints: 24, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Music", duration: "4 years", minPoints: 24, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Library & Information Science", duration: "3 years", minPoints: 25, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Education (Pre & Lower Primary)", duration: "4 years", minPoints: 25, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Bachelor of Education (Adult Education & Lifelong Learning)", duration: "4 years", minPoints: 24, bestN: 6, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Diploma in Youth & Community Development", duration: "2 years", minPoints: 22, bestN: 6, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
-          { name: "Certificate in Community Based Work with Children & Youth", duration: "1 year", minPoints: 20, bestN: 6, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://www.unam.edu.na/undergraduate-programmes" },
         ],
       },
     ],
   },
   {
     key: "NUST",
-    country: "Namibia",
-    region: "Namibia",
-    accent: "#8a2be2",
     name: "NUST",
     fullName: "Namibia University of Science and Technology",
     officialSite: "https://www.nust.na",
     applyUrl: "https://ienabler.nust.na/pls/prodi41/w99pkg.mi_login",
     portalName: "NUST iEnabler",
-    applicationDeadline: "2027-08-31",
+    applicationDeadline: "2026-08-31",
     faculties: [
       {
         name: "Computing & Informatics",
@@ -165,55 +120,29 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
           { name: "Bachelor of Computer Science (Cyber Security)", duration: "3 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Computer Science (Software Development)", duration: "3 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Computer Science (Systems Administration)", duration: "3 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Computer Science (Artificial Intelligence)", duration: "3 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Informatics (Business Analysis)", duration: "3 years", minPoints: 28, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "D" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Informatics (Information Systems Auditing)", duration: "3 years", minPoints: 28, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "D" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Geoinformation Technology", duration: "3 years", minPoints: 28, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Diploma in Information Technology", duration: "2 years", minPoints: 25, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }, { subject: "Mathematics", minGrade: "D" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Certificate in Information Technology", duration: "1 year", minPoints: 20, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://www.nust.na/programmes" },
         ],
       },
       {
         name: "Engineering & Spatial Sciences",
         courses: [
-          { name: "Bachelor of Engineering in Chemical Engineering", duration: "4 years", minPoints: 35, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }, { subject: "Physics", anyOf: ["Physics", "Chemistry"], minGrade: "B" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Engineering in Civil Engineering", duration: "4 years", minPoints: 35, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }, { subject: "Physics", anyOf: ["Physics", "Chemistry"], minGrade: "B" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Engineering in Mechanical Engineering", duration: "4 years", minPoints: 35, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }, { subject: "Physics", anyOf: ["Physics", "Chemistry"], minGrade: "B" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Engineering in Electrical Power Engineering", duration: "4 years", minPoints: 35, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }, { subject: "Physics", anyOf: ["Physics", "Chemistry"], minGrade: "B" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Engineering in Electronics & Telecommunications", duration: "4 years", minPoints: 35, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }, { subject: "Physics", anyOf: ["Physics", "Chemistry"], minGrade: "B" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Engineering in Mining Engineering", duration: "4 years", minPoints: 35, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }, { subject: "Physics", anyOf: ["Physics", "Chemistry"], minGrade: "B" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Engineering in Metallurgical Engineering", duration: "4 years", minPoints: 35, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }, { subject: "Chemistry", anyOf: ["Chemistry", "Physics"], minGrade: "B" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Engineering in Industrial Engineering", duration: "4 years", minPoints: 34, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }, { subject: "Physics", anyOf: ["Physics", "Chemistry"], minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Engineering in Agricultural Engineering", duration: "4 years", minPoints: 33, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }, { subject: "Physics", anyOf: ["Physics", "Chemistry", "Biology"], minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Architecture", duration: "4 years", minPoints: 32, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Quantity Surveying", duration: "3 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Construction Management", duration: "3 years", minPoints: 29, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Land Surveying (Geomatics)", duration: "4 years", minPoints: 32, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Property Studies", duration: "3 years", minPoints: 28, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "D" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Regional & Urban Planning", duration: "4 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Land Administration", duration: "3 years", minPoints: 27, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Diploma in Civil Engineering", duration: "3 years", minPoints: 27, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Diploma in Electrical Engineering", duration: "3 years", minPoints: 27, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Diploma in Mechanical Engineering", duration: "3 years", minPoints: 27, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
         ],
       },
       {
-        name: "Commerce, Human Sciences & Education",
+        name: "Commerce & Management Sciences",
         courses: [
-          { name: "Bachelor of Accounting (Chartered Accountancy)", duration: "3 years", minPoints: 32, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Accounting (Professional)", duration: "3 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Economics", duration: "3 years", minPoints: 28, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Business Management", duration: "3 years", minPoints: 27, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Marketing", duration: "3 years", minPoints: 27, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "D" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Logistics & Supply Chain Management", duration: "3 years", minPoints: 28, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Transport Management", duration: "3 years", minPoints: 27, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "D" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Human Resources Management", duration: "3 years", minPoints: 25, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Public Management", duration: "3 years", minPoints: 25, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Hospitality Management", duration: "3 years", minPoints: 25, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Tourism Innovation & Development", duration: "3 years", minPoints: 25, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Technical & Vocational Education & Training (TVET)", duration: "4 years", minPoints: 26, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "D" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Diploma in Business Process Management", duration: "2 years", minPoints: 24, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Certificate in Business Administration", duration: "1 year", minPoints: 20, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://www.nust.na/programmes" },
         ],
       },
       {
@@ -222,16 +151,8 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
           { name: "Bachelor of Medical Laboratory Sciences", duration: "4 years", minPoints: 32, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }, { subject: "Physics", anyOf: ["Physics", "Chemistry"], minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Emergency Medical Care", duration: "3 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Environmental Health Sciences", duration: "4 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Science in Applied Chemistry", duration: "3 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }, { subject: "Chemistry", anyOf: ["Chemistry", "Physics"], minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Science in Biology & Biotechnology", duration: "3 years", minPoints: 29, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
+          { name: "Bachelor of Natural Resource Management", duration: "3 years", minPoints: 27, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "D" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Science in Applied Mathematics & Statistics", duration: "3 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Science in Applied Physics & Renewable Energy", duration: "3 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "B" }, { subject: "Physics", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Science in Geology", duration: "3 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }, { subject: "Physics", anyOf: ["Physics", "Chemistry", "Geography"], minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Natural Resource Management (Nature Conservation)", duration: "3 years", minPoints: 27, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "D" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Agriculture (Agribusiness & Crop Production)", duration: "3 years", minPoints: 27, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", anyOf: ["Biology", "Agriculture"], minGrade: "D" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Animal Health & Production", duration: "3 years", minPoints: 27, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Diploma in Nature Conservation", duration: "3 years", minPoints: 24, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }, { subject: "Biology", minGrade: "D" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Diploma in Environmental Health", duration: "3 years", minPoints: 25, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }, { subject: "Biology", minGrade: "D" }], sourceUrl: "https://www.nust.na/programmes" },
         ],
       },
       {
@@ -240,24 +161,18 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
           { name: "Bachelor of Communication", duration: "3 years", minPoints: 26, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of Journalism & Media Technology", duration: "3 years", minPoints: 26, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
           { name: "Bachelor of English & Applied Linguistics", duration: "3 years", minPoints: 25, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Public Relations & Corporate Communication", duration: "3 years", minPoints: 26, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Sport Management", duration: "3 years", minPoints: 25, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
-          { name: "Bachelor of Criminal Justice", duration: "3 years", minPoints: 26, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.nust.na/programmes" },
         ],
       },
     ],
   },
   {
     key: "IUM",
-    country: "Namibia",
-    region: "Namibia",
-    accent: "#ff8a3d",
     name: "IUM",
     fullName: "International University of Management",
     officialSite: "https://www.ium.edu.na",
     applyUrl: "https://www.ium.edu.na/apply/",
     portalName: "IUM Application Portal",
-    applicationDeadline: "2027-11-30",
+    applicationDeadline: "2026-11-30",
     faculties: [
       {
         name: "Business Administration & Information Technology",
@@ -267,13 +182,6 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
           { name: "Bachelor of Finance & Management (Honours)", duration: "4 years", minPoints: 25, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
           { name: "Bachelor of Marketing Management (Honours)", duration: "4 years", minPoints: 25, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
           { name: "Diploma in Information Technology", duration: "2 years", minPoints: 22, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
-          { name: "Bachelor of Accounting & Finance (Honours)", duration: "4 years", minPoints: 26, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "D" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
-          { name: "Bachelor of Human Resources Management (Honours)", duration: "4 years", minPoints: 25, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
-          { name: "Bachelor of Public Administration & Management (Honours)", duration: "4 years", minPoints: 25, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
-          { name: "Bachelor of Logistics & Supply Chain Management (Honours)", duration: "4 years", minPoints: 25, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
-          { name: "Bachelor of Entrepreneurship & Small Business Management", duration: "4 years", minPoints: 24, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
-          { name: "Diploma in Business Administration", duration: "2 years", minPoints: 22, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
-          { name: "Certificate in Business Administration", duration: "1 year", minPoints: 20, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
         ],
       },
       {
@@ -282,9 +190,6 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
           { name: "Bachelor of Nursing Science (Honours)", duration: "4 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
           { name: "Bachelor of Environmental Health", duration: "4 years", minPoints: 26, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "D" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
           { name: "Diploma in Public Health", duration: "3 years", minPoints: 24, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
-          { name: "Bachelor of Public Health (Honours)", duration: "4 years", minPoints: 27, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
-          { name: "Bachelor of Social Work (Honours)", duration: "4 years", minPoints: 25, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
-          { name: "Diploma in Nursing Science", duration: "3 years", minPoints: 25, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }, { subject: "Biology", minGrade: "D" }], sourceUrl: "https://www.ium.edu.na/faculties/" },
         ],
       },
       {
@@ -306,15 +211,12 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
   },
   {
     key: "Welwitchia",
-    country: "Namibia",
-    region: "Namibia",
-    accent: "#3dffa5",
     name: "Welwitchia",
     fullName: "Welwitchia Health Sciences University",
     officialSite: "https://welwitchiauniversity.edu.na",
     applyUrl: "https://welwitchiauniversity.edu.na/apply/",
     portalName: "Welwitchia Apply Online",
-    applicationDeadline: "2027-11-30",
+    applicationDeadline: "2026-11-30",
     faculties: [
       {
         name: "Nursing, Pharmacy & Health Sciences",
@@ -324,31 +226,18 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
           { name: "Diploma in General Nursing and Midwifery", duration: "3 years", minPoints: 24, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }, { subject: "Biology", minGrade: "D" }], sourceUrl: "https://welwitchiauniversity.edu.na/programmes/" },
           { name: "Diploma in Occupational Health & Safety", duration: "2 years", minPoints: 22, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://welwitchiauniversity.edu.na/programmes/" },
           { name: "Diploma in Community Health & Caregiving", duration: "2 years", minPoints: 20, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://welwitchiauniversity.edu.na/programmes/" },
-          { name: "Bachelor of Science in Environmental Health", duration: "4 years", minPoints: 27, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://welwitchiauniversity.edu.na/programmes/" },
-          { name: "Bachelor of Public Health", duration: "4 years", minPoints: 27, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://welwitchiauniversity.edu.na/programmes/" },
-          { name: "Bachelor of Science in Radiography (Diagnostic)", duration: "4 years", minPoints: 30, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Physics", minGrade: "C" }, { subject: "Mathematics", minGrade: "C" }], sourceUrl: "https://welwitchiauniversity.edu.na/programmes/" },
-          { name: "Bachelor of Emergency Medical Care", duration: "4 years", minPoints: 28, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Biology", minGrade: "C" }], sourceUrl: "https://welwitchiauniversity.edu.na/programmes/" },
-          { name: "Bachelor of Social Work", duration: "4 years", minPoints: 25, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://welwitchiauniversity.edu.na/programmes/" },
-          { name: "Bachelor of Business Administration", duration: "3 years", minPoints: 24, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://welwitchiauniversity.edu.na/programmes/" },
-          { name: "Bachelor of Education (Secondary)", duration: "4 years", minPoints: 25, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://welwitchiauniversity.edu.na/programmes/" },
-          { name: "Diploma in Pharmacy Assistance", duration: "2 years", minPoints: 23, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }, { subject: "Chemistry", minGrade: "E" }], sourceUrl: "https://welwitchiauniversity.edu.na/programmes/" },
-          { name: "Diploma in Medical Laboratory Assistance", duration: "2 years", minPoints: 23, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }, { subject: "Biology", minGrade: "D" }], sourceUrl: "https://welwitchiauniversity.edu.na/programmes/" },
-          { name: "Certificate in Home Based Care", duration: "1 year", minPoints: 18, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://welwitchiauniversity.edu.na/programmes/" },
         ],
       },
     ],
   },
   {
     key: "TC",
-    country: "Namibia",
-    region: "Namibia",
-    accent: "#ff5da2",
     name: "TC",
     fullName: "Triumphant College",
     officialSite: "https://www.triumphantcollege.com",
     applyUrl: "https://www.triumphantcollege.com/apply",
     portalName: "Triumphant College Apply",
-    applicationDeadline: "2027-11-30",
+    applicationDeadline: "2026-11-30",
     faculties: [
       {
         name: "Engineering, IT & Business",
@@ -358,27 +247,18 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
           { name: "Diploma in Business Management & Entrepreneurship", duration: "2 years", minPoints: 22, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://www.triumphantcollege.com/programmes" },
           { name: "Diploma in Information Technology & Networking", duration: "2 years", minPoints: 22, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://www.triumphantcollege.com/programmes" },
           { name: "Certificate in Logistics & Supply Chain Management", duration: "1 year", minPoints: 20, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://www.triumphantcollege.com/programmes" },
-          { name: "Diploma in Mechanical Engineering", duration: "3 years", minPoints: 24, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }, { subject: "Mathematics", minGrade: "D" }], sourceUrl: "https://www.triumphantcollege.com/programmes" },
-          { name: "Diploma in Mining Engineering", duration: "3 years", minPoints: 24, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }, { subject: "Mathematics", minGrade: "D" }], sourceUrl: "https://www.triumphantcollege.com/programmes" },
-          { name: "Diploma in Human Resources Management", duration: "2 years", minPoints: 22, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://www.triumphantcollege.com/programmes" },
-          { name: "Diploma in Accounting & Finance", duration: "2 years", minPoints: 22, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }, { subject: "Mathematics", minGrade: "D" }], sourceUrl: "https://www.triumphantcollege.com/programmes" },
-          { name: "Diploma in Public Relations & Marketing", duration: "2 years", minPoints: 22, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://www.triumphantcollege.com/programmes" },
-          { name: "Certificate in Computer Studies", duration: "1 year", minPoints: 18, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://www.triumphantcollege.com/programmes" },
         ],
       },
     ],
   },
   {
     key: "IOL",
-    country: "Namibia",
-    region: "Namibia",
-    accent: "#ffd93d",
     name: "IOL",
     fullName: "Institute of Open Learning",
     officialSite: "https://iol.edu.na",
     applyUrl: "https://iol.edu.na/apply/",
     portalName: "IOL Registration",
-    applicationDeadline: "2027-11-30",
+    applicationDeadline: "2026-11-30",
     faculties: [
       {
         name: "Education & Open Learning",
@@ -388,27 +268,18 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
           { name: "Diploma in Secondary Education", duration: "3 years", minPoints: 24, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://iol.edu.na/programmes/" },
           { name: "Diploma in Educational Management & Leadership", duration: "2 years", minPoints: 22, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://iol.edu.na/programmes/" },
           { name: "Certificate in Early Childhood Development (ECD)", duration: "1 year", minPoints: 20, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://iol.edu.na/programmes/" },
-          { name: "Diploma in Business Management", duration: "2 years", minPoints: 22, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://iol.edu.na/programmes/" },
-          { name: "Diploma in Human Resources Management", duration: "2 years", minPoints: 22, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://iol.edu.na/programmes/" },
-          { name: "Diploma in Public Administration", duration: "2 years", minPoints: 22, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://iol.edu.na/programmes/" },
-          { name: "Diploma in Information Technology", duration: "2 years", minPoints: 22, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://iol.edu.na/programmes/" },
-          { name: "Certificate in Bookkeeping & Accounting", duration: "1 year", minPoints: 18, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://iol.edu.na/programmes/" },
-          { name: "Certificate in Grade 12 Upgrade (NAMCOL Support)", duration: "1 year", minPoints: 0, bestN: 5, degreeLevel: "Certificate", requirements: [], sourceUrl: "https://iol.edu.na/programmes/" },
         ],
       },
     ],
   },
   {
     key: "SBS",
-    country: "Namibia",
-    region: "Namibia",
-    accent: "#7c9cff",
     name: "SBS",
     fullName: "Southern Business School (STADIO)",
     officialSite: "https://www.sbsnamibia.com",
     applyUrl: "https://www.sbsnamibia.com/apply/",
     portalName: "SBS Namibia Apply",
-    applicationDeadline: "2027-11-30",
+    applicationDeadline: "2026-11-30",
     faculties: [
       {
         name: "Management, Safety & Public Sector",
@@ -418,26 +289,18 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
           { name: "Bachelor of Disaster Risk Management", duration: "3 years", minPoints: 24, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://www.sbsnamibia.com/qualifications/" },
           { name: "Diploma in Management", duration: "2 years", minPoints: 22, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://www.sbsnamibia.com/qualifications/" },
           { name: "Advanced Diploma in Management", duration: "1 year", minPoints: 24, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://www.sbsnamibia.com/qualifications/" },
-          { name: "Bachelor of Public Administration", duration: "3 years", minPoints: 24, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://www.sbsnamibia.com/qualifications/" },
-          { name: "Bachelor of Education (Foundation Phase)", duration: "4 years", minPoints: 25, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }], sourceUrl: "https://www.sbsnamibia.com/qualifications/" },
-          { name: "Bachelor of Commerce (Accounting)", duration: "3 years", minPoints: 26, bestN: 5, degreeLevel: "Degree", requirements: [{ subject: "English", minGrade: "C" }, { subject: "Mathematics", minGrade: "D" }], sourceUrl: "https://www.sbsnamibia.com/qualifications/" },
-          { name: "Higher Certificate in Management", duration: "1 year", minPoints: 20, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://www.sbsnamibia.com/qualifications/" },
-          { name: "Higher Certificate in Policing Practice", duration: "1 year", minPoints: 20, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://www.sbsnamibia.com/qualifications/" },
         ],
       },
     ],
   },
   {
     key: "NIPAM",
-    country: "Namibia",
-    region: "Namibia",
-    accent: "#5ee0c8",
     name: "NIPAM",
     fullName: "Namibia Institute of Public Administration and Management",
     officialSite: "https://nipam.na",
     applyUrl: "https://nipam.na/apply/",
     portalName: "NIPAM Registration",
-    applicationDeadline: "2027-11-30",
+    applicationDeadline: "2026-11-30",
     faculties: [
       {
         name: "Public Governance & Administration",
@@ -446,22 +309,8 @@ export const NAMIBIAN_INSTITUTIONS: Institution[] = [
           { name: "Diploma in Local Government Management", duration: "2 years", minPoints: 22, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://nipam.na/training/" },
           { name: "Certificate in Public Sector Finance & Procurement", duration: "1 year", minPoints: 20, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://nipam.na/training/" },
           { name: "Specialized Certificate in Public Governance", duration: "1 year", minPoints: 20, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://nipam.na/training/" },
-          { name: "Certificate in Monitoring & Evaluation", duration: "1 year", minPoints: 20, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://nipam.na/training/" },
-          { name: "Certificate in Project Management", duration: "1 year", minPoints: 20, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://nipam.na/training/" },
-          { name: "Certificate in Human Resource Practice", duration: "1 year", minPoints: 20, bestN: 5, degreeLevel: "Certificate", requirements: [{ subject: "English", minGrade: "E" }], sourceUrl: "https://nipam.na/training/" },
-          { name: "Diploma in Public Sector Leadership", duration: "2 years", minPoints: 23, bestN: 5, degreeLevel: "Diploma", requirements: [{ subject: "English", minGrade: "D" }], sourceUrl: "https://nipam.na/training/" },
         ],
       },
     ],
   },
 ];
-
-
-/** Namibian institutions first, then accredited SADC universities. */
-export const INSTITUTIONS: Institution[] = [...NAMIBIAN_INSTITUTIONS, ...SADC_INSTITUTIONS];
-
-export const COUNTRIES = Array.from(new Set(INSTITUTIONS.map((i) => i.country)));
-
-export function accentFor(inst: Institution): string {
-  return inst.accent ?? "#00f3ff";
-}

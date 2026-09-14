@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Bookmark,
@@ -12,15 +12,12 @@ import {
   Filter,
   GraduationCap,
   Home,
-  LogIn,
-  LogOut,
   RefreshCw,
   Search,
   Settings,
   SlidersHorizontal,
   Sparkles,
   Trash2,
-  UserRound,
   X,
   Zap,
 } from "lucide-react";
@@ -31,7 +28,7 @@ import {
   type NSSCOGrade,
   type SubjectEntry,
 } from "@/lib/points";
-import { INSTITUTIONS, accentFor, type Course, type Faculty, type Institution } from "@/lib/courses";
+import { INSTITUTIONS, type Course, type Faculty, type Institution } from "@/lib/courses";
 import { courseLevel, evaluateCourse, matchesQuery, type EvaluatedCourse } from "@/lib/evaluate";
 import { CAREERS, careerMatchesCourse, findCareer } from "@/lib/careers";
 import { deadlineInfo, isNsfafEligible, PROSPECTUS_YEAR } from "@/lib/admissions";
@@ -40,8 +37,6 @@ import { useShortlist } from "@/lib/shortlist";
 import { GradeSheet, ScoreGauges, englishBadge, newRow } from "@/components/grade-sheet";
 import { CourseCard, CourseSheet } from "@/components/course-card";
 import { listScrapedCourses, scrapeInstitution, type ScrapedCourseRow } from "@/lib/scrape.functions";
-import { useAuth } from "@/lib/auth";
-import { useCloudProgress, type SyncState } from "@/lib/sync";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -92,38 +87,8 @@ function HomePage() {
   const [activeInst, setActiveInst] = useState<InstitutionKey>("UNAM");
   const [selected, setSelected] = useState<{ course: EvaluatedCourse; inst: Institution } | null>(null);
   const shortlist = useShortlist();
-  const { user, loading: authLoading, signOut } = useAuth();
-  const syncState = useCloudProgress({
-    user,
-    entries,
-    setEntries,
-    shortlist: shortlist.items,
-    setShortlist: shortlist.setAll,
-  });
 
   const inst = INSTITUTIONS.find((i) => i.key === activeInst)!;
-
-  const gradedCount = entries.filter((e) => e.subject && e.grade && e.grade !== "U").length;
-  const onboarding = !authLoading && (!user || gradedCount < 5);
-
-  if (authLoading) {
-    return (
-      <div className="grid min-h-[100dvh] place-items-center text-sm text-white/50">Loading…</div>
-    );
-  }
-
-  if (onboarding) {
-    return (
-      <Onboarding
-        user={user}
-        gradedCount={gradedCount}
-        entries={entries}
-        setEntries={setEntries}
-        sheetOpen={sheetOpen}
-        setSheetOpen={setSheetOpen}
-      />
-    );
-  }
 
   const toggleSave = (c: EvaluatedCourse, i: Institution) =>
     shortlist.toggle({
@@ -135,7 +100,7 @@ function HomePage() {
     });
 
   return (
-    <div className="min-h-[100dvh] w-full overflow-x-hidden pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:pb-6 sm:pl-[76px]">
+    <div className="min-h-screen pb-24 sm:pb-0 sm:pl-[76px]">
       {/* Desktop side dock */}
       <nav className="fixed inset-y-0 left-0 z-40 hidden w-[76px] flex-col items-center gap-1 border-r border-white/10 glass-strong py-4 sm:flex">
         <div className="mb-3 grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-violet)] glow-primary">
@@ -172,7 +137,7 @@ function HomePage() {
               }`}
               style={
                 activeInst === i.key && view === "courses"
-                  ? { background: accentFor(i) }
+                  ? { background: `var(--color-${i.key.toLowerCase()})` }
                   : undefined
               }
             >
@@ -184,49 +149,26 @@ function HomePage() {
 
       {/* Top bar */}
       <header className="sticky top-0 z-30 border-b border-white/10 glass-strong">
-        <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-violet)] glow-primary sm:hidden">
-              <Cpu className="h-4.5 w-4.5 text-[#0b0f19]" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="truncate text-sm font-bold tracking-tight sm:text-base">
-                <span className="neon-cyan">POINTS</span>
-                <span className="mx-1 opacity-40">/</span>
-                <span className="neon-violet">MATRIX</span>
-              </h1>
-              <p className="truncate text-[10px] uppercase tracking-[0.15em] text-white/45">
-                {NAV.find((n) => n.key === view)?.label} · {PROSPECTUS_YEAR}
-              </p>
-            </div>
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-violet)] glow-primary sm:hidden">
+            <Cpu className="h-4.5 w-4.5 text-[#0b0f19]" />
           </div>
-          <div className="flex shrink-0 items-center gap-1.5">
-            <button
-              onClick={() => setSheetOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/10 px-2.5 py-1.5 text-[11px] font-bold text-[var(--neon-cyan)] transition hover:bg-[var(--neon-cyan)]/20 sm:px-3"
-            >
-              <SlidersHorizontal className="h-3.5 w-3.5" />
-              <span className="hidden xs:inline sm:inline">Grades</span>
-            </button>
-            {authLoading ? null : user ? (
-              <button
-                onClick={() => setView("settings")}
-                aria-label="Account"
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[var(--success)]/40 bg-[var(--success)]/10 text-[var(--success)]"
-              >
-                <UserRound className="h-4 w-4" />
-              </button>
-            ) : (
-              <Link
-                to="/auth"
-                aria-label="Sign in"
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-2.5 py-1.5 text-[11px] font-bold text-white/80 transition hover:bg-white/10"
-              >
-                <LogIn className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Sign in</span>
-              </Link>
-            )}
+          <div className="min-w-0 flex-1">
+            <h1 className="text-sm font-bold tracking-tight sm:text-base">
+              <span className="neon-cyan">POINTS</span>
+              <span className="mx-1 opacity-40">/</span>
+              <span className="neon-violet">MATRIX</span>
+            </h1>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-white/45">
+              {NAV.find((n) => n.key === view)?.label} · {PROSPECTUS_YEAR} prospectus
+            </p>
           </div>
+          <button
+            onClick={() => setSheetOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/10 px-3 py-1.5 text-[11px] font-bold text-[var(--neon-cyan)] transition hover:bg-[var(--neon-cyan)]/20"
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5" /> Grade Sheet
+          </button>
         </div>
       </header>
 
@@ -274,21 +216,11 @@ function HomePage() {
           />
         )}
 
-        {view === "settings" && (
-          <SettingsView
-            entries={entries}
-            whatIf={whatIf}
-            onToggleWhatIf={setWhatIf}
-            user={user}
-            authLoading={authLoading}
-            syncState={syncState}
-            onSignOut={signOut}
-          />
-        )}
+        {view === "settings" && <SettingsView entries={entries} whatIf={whatIf} onToggleWhatIf={setWhatIf} />}
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 glass-strong pb-[env(safe-area-inset-bottom)] sm:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 glass-strong sm:hidden">
         <div className="grid grid-cols-5">
           {NAV.map((n) => (
             <button
@@ -324,9 +256,6 @@ function HomePage() {
           saved={shortlist.has(selected.inst.key, selected.course.name)}
           onToggleSave={() => toggleSave(selected.course, selected.inst)}
           onClose={() => setSelected(null)}
-          onOpenPathway={(c, i, faculty) =>
-            setSelected({ inst: i, course: evaluateCourse(c, entries, i.key, faculty) })
-          }
         />
       )}
     </div>
@@ -350,10 +279,9 @@ function DashboardView({
   onGoCourses: (k: InstitutionKey) => void;
   onGo: (v: View) => void;
 }) {
-  const [region, setRegion] = useState<"Namibia" | "SADC">("Namibia");
   const stats = useMemo(
     () =>
-      INSTITUTIONS.filter((i) => i.region === region).map((inst) => {
+      INSTITUTIONS.map((inst) => {
         let eligible = 0;
         let total = 0;
         for (const f of inst.faculties) {
@@ -364,7 +292,7 @@ function DashboardView({
         }
         return { inst, eligible, total };
       }),
-    [entries, region],
+    [entries],
   );
 
   const totalEligible = stats.reduce((a, s) => a + s.eligible, 0);
@@ -401,22 +329,7 @@ function DashboardView({
       </section>
 
       <section className="space-y-2">
-        <div className="flex items-center justify-between gap-2 px-1">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-white/50">Institutions</h2>
-          <div className="flex gap-1 rounded-full border border-white/10 bg-white/5 p-0.5">
-            {(["Namibia", "SADC"] as const).map((r) => (
-              <button
-                key={r}
-                onClick={() => setRegion(r)}
-                className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition ${
-                  region === r ? "bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)]" : "text-white/50"
-                }`}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
-        </div>
+        <h2 className="px-1 text-xs font-bold uppercase tracking-widest text-white/50">Institutions</h2>
         <div className="grid gap-2 sm:grid-cols-2">
           {stats.map(({ inst, eligible, total }) => {
             const d = deadlineInfo(inst);
@@ -428,7 +341,7 @@ function DashboardView({
               >
                 <span
                   className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-[10px] font-black text-[#0b0f19]"
-                  style={{ background: accentFor(inst) }}
+                  style={{ background: `var(--color-${inst.key.toLowerCase()})` }}
                 >
                   {inst.name.slice(0, 4)}
                 </span>
@@ -466,7 +379,6 @@ function CoursesView({
   onToggleSave: (c: EvaluatedCourse) => void;
 }) {
   const [query, setQuery] = useState("");
-  const [country, setCountry] = useState<string>("All");
   const [levels, setLevels] = useState<string[]>([]);
   const [faculty, setFaculty] = useState("All");
   const [onlyEligible, setOnlyEligible] = useState(false);
@@ -485,11 +397,7 @@ function CoursesView({
     setScraped(null);
     (async () => {
       try {
-        if (inst.region !== "Namibia") {
-          if (!cancelled) { setScraped([]); setLoading(false); }
-          return;
-        }
-        const rows = await listFn({ data: { institutionKey: inst.key as never } });
+        const rows = await listFn({ data: { institutionKey: inst.key } });
         if (!cancelled) setScraped(rows);
       } catch {
         if (!cancelled) setScraped([]);
@@ -500,12 +408,12 @@ function CoursesView({
     return () => {
       cancelled = true;
     };
-  }, [inst.key, inst.region, listFn]);
+  }, [inst.key, listFn]);
 
   const sync = async () => {
     try {
       setSyncing(true);
-      const res = await scrapeFn({ data: { institutionKey: inst.key as never } });
+      const res = await scrapeFn({ data: { institutionKey: inst.key } });
       setScraped(res.courses ?? []);
     } catch {
       /* keep accredited directory */
@@ -546,13 +454,24 @@ function CoursesView({
 
   return (
     <div className="space-y-4">
-      <CountrySwitcher
-        country={country}
-        setCountry={setCountry}
-        activeKey={inst.key}
-        onSelectInst={onSelectInst}
-      />
-
+      {/* Institution carousel */}
+      <div className="-mx-4 flex gap-1.5 overflow-x-auto scrollbar-none px-4 pb-1">
+        {INSTITUTIONS.map((i) => {
+          const active = i.key === inst.key;
+          return (
+            <button
+              key={i.key}
+              onClick={() => onSelectInst(i.key)}
+              className={`shrink-0 rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition ${
+                active ? "text-[#0b0f19]" : "border border-white/10 bg-white/5 text-white/60 hover:text-white"
+              }`}
+              style={active ? { background: `var(--color-${i.key.toLowerCase()})` } : undefined}
+            >
+              {i.name}
+            </button>
+          );
+        })}
+      </div>
 
       <section className="glass rounded-3xl p-4">
         <div className="flex items-start justify-between gap-3">
@@ -564,7 +483,6 @@ function CoursesView({
               {eligibleCount} of {evaluated.length} programmes open to you · Best {inst.key === "UNAM" ? "5/6" : "6"} rules
             </p>
           </div>
-          {inst.region === "Namibia" && (
           <button
             onClick={sync}
             disabled={syncing}
@@ -574,7 +492,6 @@ function CoursesView({
             <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
             {syncing ? "Syncing" : "Sync"}
           </button>
-          )}
         </div>
 
         <div className="mt-3 flex gap-2">
@@ -609,7 +526,7 @@ function CoursesView({
         </div>
 
         {/* Level pill carousel */}
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className="-mx-4 mt-3 flex gap-1.5 overflow-x-auto scrollbar-none px-4">
           <button
             onClick={() => setLevels([])}
             className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
@@ -973,71 +890,17 @@ function SettingsView({
   entries,
   whatIf,
   onToggleWhatIf,
-  user,
-  authLoading,
-  syncState,
-  onSignOut,
 }: {
   entries: SubjectEntry[];
   whatIf: boolean;
   onToggleWhatIf: (v: boolean) => void;
-  user: { email?: string | null } | null;
-  authLoading: boolean;
-  syncState: SyncState;
-  onSignOut: () => void;
 }) {
   const [target, setTarget] = useState(30);
   const best6 = calcTotal(entries, "UNAM", 6);
   const gap = Math.max(0, target - best6);
-  const syncLabel: Record<SyncState, string> = {
-    idle: "Not syncing",
-    loading: "Loading your saved progress…",
-    saving: "Saving…",
-    saved: "All progress saved to your account",
-    error: "Could not sync — check your connection",
-  };
 
   return (
     <div className="space-y-4">
-      <section className="glass rounded-3xl p-4">
-        <h2 className="flex items-center gap-2 text-sm font-bold">
-          <UserRound className="h-4 w-4 text-[var(--neon-cyan)]" /> Account
-        </h2>
-        {authLoading ? (
-          <p className="mt-2 text-[11px] text-white/50">Checking your session…</p>
-        ) : user ? (
-          <div className="mt-3 space-y-3">
-            <p className="break-all text-xs text-white/70">
-              Signed in as <strong className="text-white">{user.email ?? "your account"}</strong>
-            </p>
-            <p
-              className={`text-[11px] ${
-                syncState === "error" ? "text-[var(--destructive)]" : "text-white/50"
-              }`}
-            >
-              {syncLabel[syncState]}
-            </p>
-            <button
-              onClick={onSignOut}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-bold text-white/70 transition hover:bg-white/10"
-            >
-              Sign out
-            </button>
-          </div>
-        ) : (
-          <div className="mt-3 space-y-3">
-            <p className="text-[11px] text-white/55">
-              Sign in to save your grades and shortlist so you never lose progress when you switch devices.
-            </p>
-            <Link
-              to="/auth"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] px-4 py-2.5 text-xs font-bold text-[#0b0f19]"
-            >
-              <LogIn className="h-4 w-4" /> Sign in / Create account
-            </Link>
-          </div>
-        )}
-      </section>
       <section className="glass rounded-3xl p-4">
         <h2 className="flex items-center gap-2 text-sm font-bold">
           <Zap className="h-4 w-4 text-[var(--neon-cyan)]" /> Target Score Simulator
@@ -1082,214 +945,8 @@ function SettingsView({
           criteria for accredited Namibian institutions. It is an indicative guide — final admission decisions rest
           with each institution.
         </p>
-        <p className="mt-3 rounded-xl border border-white/10 bg-black/30 p-3 text-white/70">
-          Created by <strong className="text-white">Andreas Mukalele</strong>, a Grade 12 learner. For more info
-          contact him on{" "}
-          <a href="tel:0858141236" className="font-semibold text-[var(--neon-cyan)]">
-            085 814 1236
-          </a>{" "}
-          or on Instagram{" "}
-          <a
-            href="https://instagram.com/legal_criminal90067"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-semibold text-[var(--neon-violet)]"
-          >
-            @legal_criminal90067
-          </a>
-          .
-        </p>
         <p className="mt-2">Install this app from your browser menu (“Add to Home screen”) to use it offline-style, full screen.</p>
       </section>
-    </div>
-  );
-}
-
-/* ------------------------------ Onboarding -------------------------------- */
-
-function Onboarding({
-  user,
-  gradedCount,
-  entries,
-  setEntries,
-  sheetOpen,
-  setSheetOpen,
-}: {
-  user: { email?: string | null } | null;
-  gradedCount: number;
-  entries: SubjectEntry[];
-  setEntries: React.Dispatch<React.SetStateAction<SubjectEntry[]>>;
-  sheetOpen: boolean;
-  setSheetOpen: (v: boolean) => void;
-}) {
-  const steps = [
-    {
-      done: !!user,
-      title: "Sign in to save your progress",
-      body: "Your grades and shortlist are stored on your account, so nothing is lost when you close the app or switch phones.",
-    },
-    {
-      done: gradedCount >= 5,
-      title: "Enter at least 5 subject grades",
-      body: `You have captured ${gradedCount} of 5 required subjects. Add your NSSCO or NSSCAS symbols to unlock the calculator.`,
-    },
-  ];
-
-  return (
-    <div className="min-h-[100dvh] w-full overflow-x-hidden px-4 py-10">
-      <div className="mx-auto max-w-md space-y-5 animate-fade-in">
-        <div className="text-center">
-          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-violet)] glow-primary">
-            <Cpu className="h-7 w-7 text-[#0b0f19]" />
-          </div>
-          <h1 className="mt-4 font-display text-2xl font-black tracking-tight">
-            <span className="neon-cyan">POINTS</span>
-            <span className="mx-1 opacity-40">/</span>
-            <span className="neon-violet">MATRIX</span>
-          </h1>
-          <p className="mt-2 text-xs text-white/50">
-            Two quick steps before you start — {PROSPECTUS_YEAR} admission points for Namibia and the SADC region.
-          </p>
-        </div>
-
-        {steps.map((st, idx) => (
-          <section
-            key={st.title}
-            className={`glass rounded-3xl p-4 ${st.done ? "border-[var(--success)]/40" : ""}`}
-          >
-            <div className="flex items-start gap-3">
-              <span
-                className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[11px] font-black ${
-                  st.done
-                    ? "bg-[var(--success)]/20 text-[var(--success)]"
-                    : "bg-white/10 text-white/60"
-                }`}
-              >
-                {st.done ? "✓" : idx + 1}
-              </span>
-              <div className="min-w-0">
-                <h2 className="text-sm font-bold">{st.title}</h2>
-                <p className="mt-1 text-[11px] text-white/55">{st.body}</p>
-              </div>
-            </div>
-            {idx === 0 && !st.done && (
-              <Link
-                to="/auth"
-                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] px-4 py-2.5 text-xs font-bold text-[#0b0f19]"
-              >
-                <LogIn className="h-4 w-4" /> Sign in / Create account
-              </Link>
-            )}
-            {idx === 1 && !st.done && (
-              <button
-                disabled={!user}
-                onClick={() => setSheetOpen(true)}
-                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/10 px-4 py-2.5 text-xs font-bold text-[var(--neon-cyan)] disabled:opacity-40"
-              >
-                <SlidersHorizontal className="h-4 w-4" /> Open Grade Sheet
-              </button>
-            )}
-          </section>
-        ))}
-      </div>
-
-      <GradeSheet
-        open={sheetOpen}
-        onClose={() => setSheetOpen(false)}
-        entries={entries}
-        setEntries={setEntries}
-        institution="UNAM"
-        whatIf={false}
-        onToggleWhatIf={() => {}}
-        onExport={() => exportSummaryPdf(entries)}
-      />
-    </div>
-  );
-}
-
-/* --------------------------- Country switcher ------------------------------ */
-
-function CountrySwitcher({
-  country,
-  setCountry,
-  activeKey,
-  onSelectInst,
-}: {
-  country: string;
-  setCountry: (c: string) => void;
-  activeKey: InstitutionKey;
-  onSelectInst: (k: InstitutionKey) => void;
-}) {
-  // Namibia first, then all SADC countries in data order.
-  const countries = Array.from(new Set(INSTITUTIONS.map((i) => i.country)));
-
-  return (
-    <div className="space-y-3">
-      {/* Country buttons */}
-      <div className="flex flex-wrap gap-1.5">
-        <button
-          onClick={() => setCountry("All")}
-          className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-bold transition ${
-            country === "All"
-              ? "border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)]"
-              : "border-white/10 bg-white/5 text-white/60 hover:text-white"
-          }`}
-        >
-          All countries
-        </button>
-        {countries.map((c) => (
-          <button
-            key={c}
-            onClick={() => {
-              const next = country === c ? "All" : c;
-              setCountry(next);
-              if (next !== "All") {
-                const first = INSTITUTIONS.find((i) => i.country === c);
-                if (first) onSelectInst(first.key);
-              }
-            }}
-            className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-bold transition ${
-              country === c
-                ? "border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)]"
-                : "border-white/10 bg-white/5 text-white/60 hover:text-white"
-            }`}
-          >
-            {c}
-          </button>
-        ))}
-      </div>
-
-      {/* Institutions grouped under country headings */}
-      <div className="space-y-3">
-        {(country === "All" ? countries : [country]).map((c) => {
-          const group = INSTITUTIONS.filter((i) => i.country === c);
-          if (!group.length) return null;
-          return (
-            <div key={c} className="space-y-1.5">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40">
-                {c} <span className="text-white/25">· {group.length}</span>
-              </p>
-              <div className="flex flex-wrap gap-1.5 pb-1">
-                {group.map((i) => {
-                  const active = i.key === activeKey;
-                  return (
-                    <button
-                      key={i.key}
-                      onClick={() => onSelectInst(i.key)}
-                      className={`shrink-0 rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition ${
-                        active ? "text-[#0b0f19]" : "border border-white/10 bg-white/5 text-white/60 hover:text-white"
-                      }`}
-                      style={active ? { background: accentFor(i) } : undefined}
-                    >
-                      {i.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }
