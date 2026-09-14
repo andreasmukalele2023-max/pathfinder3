@@ -6,6 +6,7 @@ import {
   BookmarkCheck,
   CalendarClock,
   CheckCircle2,
+  ChevronRight,
   Clock,
   ExternalLink,
   Lock,
@@ -13,7 +14,7 @@ import {
   Wrench,
   X,
 } from "lucide-react";
-import type { Institution } from "@/lib/courses";
+import type { Course, Institution } from "@/lib/courses";
 import type { SubjectEntry } from "@/lib/points";
 import type { EvaluatedCourse } from "@/lib/evaluate";
 import { courseLevel } from "@/lib/evaluate";
@@ -131,6 +132,7 @@ export function CourseSheet({
   saved,
   onToggleSave,
   onClose,
+  onOpenPathway,
 }: {
   course: EvaluatedCourse;
   inst: Institution;
@@ -138,6 +140,7 @@ export function CourseSheet({
   saved: boolean;
   onToggleSave: () => void;
   onClose: () => void;
+  onOpenPathway?: (course: Course, inst: Institution, faculty: string) => void;
 }) {
   const fee = estimatedFee(course, inst.key);
   const deadline = deadlineInfo(inst);
@@ -275,9 +278,11 @@ export function CourseSheet({
               <RouteIcon className="h-3.5 w-3.5" /> Alternative pathways into this field
             </div>
             {pathways.map((p) => (
-              <div
+              <button
                 key={`${p.inst.key}-${p.course.name}`}
-                className="flex items-center justify-between gap-2 rounded-lg border border-white/10 bg-black/30 px-2.5 py-1.5 text-[11px]"
+                type="button"
+                onClick={() => onOpenPathway?.(p.course, p.inst, p.faculty)}
+                className="flex w-full items-center justify-between gap-2 rounded-lg border border-white/10 bg-black/30 px-2.5 py-1.5 text-left text-[11px] transition hover:border-[var(--neon-violet)]/50 hover:bg-[var(--neon-violet)]/10 active:scale-[0.99]"
               >
                 <span className="min-w-0">
                   <span className="font-semibold text-white">{p.course.name}</span>
@@ -285,14 +290,17 @@ export function CourseSheet({
                     {p.inst.name} · {p.course.duration} · {p.course.minPoints} pts
                   </span>
                 </span>
-                <span
-                  className={`shrink-0 text-[10px] font-bold ${
-                    p.eligible ? "text-[var(--success)]" : "text-white/40"
-                  }`}
-                >
-                  {p.eligible ? "Open to you" : `${p.learnerPoints}/${p.course.minPoints}`}
+                <span className="flex shrink-0 items-center gap-1">
+                  <span
+                    className={`text-[10px] font-bold ${
+                      p.eligible ? "text-[var(--success)]" : "text-white/40"
+                    }`}
+                  >
+                    {p.eligible ? "Open to you" : `${p.learnerPoints}/${p.course.minPoints}`}
+                  </span>
+                  <ChevronRight className="h-3.5 w-3.5 text-white/40" />
                 </span>
-              </div>
+              </button>
             ))}
             <div className="text-[10px] text-white/40">
               These bridging qualifications commonly articulate into the degree once completed.
