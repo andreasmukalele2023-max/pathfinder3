@@ -74,21 +74,6 @@ function AuthPage() {
     }
   };
 
-  const google = async () => {
-    setBusy(true);
-    setMsg(null);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-      extraParams: { prompt: "select_account" },
-    });
-    if (result.error) {
-      setMsg({ tone: "err", text: result.error.message });
-      setBusy(false);
-      return;
-    }
-    if (result.redirected) return;
-    navigate({ to: "/" });
-  };
 
   return (
     <div className="flex min-h-[100dvh] w-full items-center justify-center overflow-x-hidden px-4 py-10">
