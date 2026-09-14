@@ -223,6 +223,7 @@ function SubjectRow({
   canRemove: boolean;
 }) {
   const grades = entry.level === "NSSCO" ? NSSCO_GRADES : NSSCA_GRADES;
+  const groups = subjectGroupsFor(entry.level);
   const explanation = explainEntry(entry, institution);
   return (
     <div className="space-y-1.5 p-2.5">
@@ -234,7 +235,7 @@ function SubjectRow({
           className="w-full min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs focus:border-[var(--neon-cyan)]/60 focus:outline-none"
         >
           <option value="">Select subject…</option>
-          {SUBJECT_GROUPS.map((g) => (
+          {groups.map((g) => (
             <optgroup key={g.group} label={g.group}>
               {g.subjects.map((s) => (
                 <option key={s} value={s}>
@@ -245,6 +246,7 @@ function SubjectRow({
           ))}
         </select>
       </div>
+
 
       <div className="flex min-w-0 items-center gap-1.5 pl-[22px]">
         <div className="inline-flex min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 p-0.5 text-[9px] font-bold">

@@ -324,6 +324,9 @@ function HomePage() {
           saved={shortlist.has(selected.inst.key, selected.course.name)}
           onToggleSave={() => toggleSave(selected.course, selected.inst)}
           onClose={() => setSelected(null)}
+          onOpenPathway={(c, i, faculty) =>
+            setSelected({ inst: i, course: evaluateCourse(c, entries, i.key, faculty) })
+          }
         />
       )}
     </div>
